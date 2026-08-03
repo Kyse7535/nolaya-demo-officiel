@@ -30,14 +30,16 @@ function onStart() {
     </p>
 
     <div class="mt-8 rounded-card bg-surface-low p-4">
-      <p class="text-xs font-semibold uppercase tracking-wide text-secondary">Persona</p>
+      <p class="text-xs font-semibold uppercase tracking-wide text-secondary">
+        Vous dans cette démo
+      </p>
       <p class="mt-1 text-sm font-semibold text-primary">
         {{ canStart ? nameDraft.trim() : 'Vous' }} — coiffeuse en tresses, Saint-Denis
       </p>
       <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-secondary">Parcours</p>
       <ol class="mt-1 space-y-1 text-sm text-muted">
-        <li>1. Cadre · prestations · planning (précurseur)</li>
-        <li>2. Opportunité Inès · clarification · proposition ferme (Acte B)</li>
+        <li>1. Vos règles, votre offre, vos dispos</li>
+        <li>2. Une demande cliente (Inès, simulée)</li>
       </ol>
       <p class="mt-3 text-xs text-muted">
         Durée estimée : 12 à 18 minutes · Cliente Inès simulée après activation du planning
@@ -56,7 +58,7 @@ function onStart() {
         @keydown.enter.prevent="onStart"
       />
       <p class="mt-1.5 text-xs text-muted">
-        Ce prénom identifie vos retours par acte pour l’analyse du test.
+        Ce prénom identifie vos retours pour vos commentaires.
       </p>
     </div>
 

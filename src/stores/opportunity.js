@@ -23,9 +23,101 @@ import {
   SoftHoldStatus,
   SUPPLEMENT_OPTIONS,
   createEmptyOpportunity,
+  formatDuration,
+  lengthLabel,
+  prestationLabel,
+  referenceLengthId,
+  sizeLabel,
 } from '../domain/model'
 import { notifySimulation } from '../utils/simulationToast'
 import { notifyError, notifySuccess } from '../utils/toast'
+import { useOfferStore } from './offer'
+import { useScheduleStore } from './schedule'
+
+function deriveRail() {
+  const offerStore = useOfferStore()
+  const scheduleStore = useScheduleStore()
+  const offer = offerStore.offer
+  const schedule = scheduleStore.schedule
+  const base = { ...INES_RAIL }
+
+  const lengthOffers = Array.isArray(offer.lengthOffers) ? offer.lengthOffers : []
+  const preferred =
+    lengthOffers.find((o) => o.id === 'mi-dos' && o.enabled) ||
+    lengthOffers.find((o) => o.id === referenceLengthId(lengthOffers) && o.enabled) ||
+    null
+
+  const lengthId = preferred?.id || base.lengthId
+  const priceBase = preferred ? Number(preferred.price) || base.priceBase : base.priceBase
+  const hours = preferred ? Number(preferred.durationHours) || 5 : 5
+  const minutes = preferred ? Number(preferred.durationMinutes) || 30 : 30
+  const mechesAmount = Number(offer.supplementAmount) || base.mechesAmount
+  const priceTotal = priceBase + mechesAmount
+  const durationLabel = preferred ? formatDuration(hours, minutes) : base.durationLabel
+
+  const modSupp = base.modificationSupplement
+  const modMin = base.modificationMinutes
+  const priceTotalV2 = priceTotal + modSupp
+  const totalMins = hours * 60 + minutes + modMin
+  const durationLabelV2 = formatDuration(Math.floor(totalMins / 60), totalMins % 60)
+
+  const deposit = base.deposit
+  const balanceFinal = priceTotalV2 - deposit
+  const platformFee = Math.round(priceTotalV2 * base.platformFeeRate)
+  const netRevenue = priceTotalV2 - platformFee
+
+  const sizeId = (offer.sizes || []).includes('medium')
+    ? 'medium'
+    : (offer.sizes || [])[0] || 'medium'
+  const sizePart = sizeLabel(sizeId)
+  const prestBase = offer.prestationId ? prestationLabel(offer.prestationId) : null
+  const prestationLbl = prestBase
+    ? `${prestBase}${sizePart && sizePart !== '—' ? ` ${sizePart.toLowerCase()}` : ''}`
+    : base.prestationLabel
+
+  const lengthLbl = lengthLabel(lengthId)
+  const place = schedule.place || base.place
+  const timeLabel = schedule.dayHours?.sam?.open || base.timeLabel
+
+  const clientPrep = String(offer.clientPrepNote || '').trim()
+  const clientTasks = clientPrep
+    ? clientPrep.replace(/\s*avant le rendez-vous\.?$/i, '').trim() || base.clientTasks
+    : base.clientTasks
+
+  const proTask = (offer.tasks || []).find((t) => t.owner === 'coiffeuse')
+  const proTasks = proTask
+    ? proTask.id === 'meches'
+      ? 'Fournir les mèches et le matériel'
+      : proTask.label
+    : base.proTasks
+
+  return {
+    ...base,
+    prestationLabel: prestationLbl,
+    lengthId,
+    lengthLabel: lengthLbl,
+    timeLabel,
+    place,
+    budgetTarget: priceTotal,
+    budgetMax: Math.max(base.budgetMax, priceTotal + 10),
+    priceBase,
+    mechesAmount,
+    priceTotal,
+    deposit,
+    durationLabel,
+    clientTasks,
+    proTasks,
+    supplies: offer.supplementLabel
+      ? `${offer.supplementLabel} souhaitées auprès de la coiffeuse`
+      : base.supplies,
+    inspirationLabel: `Inspiration ${prestationLbl.toLowerCase().includes('knotless') ? 'knotless ' : ''}${lengthLbl.toLowerCase()}`.trim(),
+    priceTotalV2,
+    durationLabelV2,
+    balanceFinal,
+    platformFee,
+    netRevenue,
+  }
+}
 
 const STORAGE_KEY = 'demo-precurseur.opportunity'
 
@@ -51,7 +143,51 @@ function nowLabel() {
 export const useOpportunityStore = defineStore('opportunity', () => {
   const state = ref(load())
 
-  const rail = computed(() => INES_RAIL)
+  const rail = computed(() => deriveRail())
+
+  const matchCriteria = computed(() => [
+    `Offre correspondante (${rail.value.prestationLabel} · ${rail.value.lengthLabel})`,
+    `Créneau libre (${rail.value.dateLabel} · ${rail.value.timeLabel})`,
+    `Zone qui correspond (${rail.value.place})`,
+    `Budget max. ${rail.value.budgetMax} €`,
+    'Cuir chevelu sensible accepté',
+  ])
+
+  const engagementSequence = computed(() =>
+    ENGAGEMENT_SEQUENCE.map((step) =>
+      step.id === 'payment'
+        ? {
+            ...step,
+            label: `Acompte de ${rail.value.deposit} € reçu`,
+            detail: `Acompte de ${rail.value.deposit} € reçu — déduit du total.`,
+          }
+        : step,
+    ),
+  )
+
+  const settlementSequence = computed(() => [
+    {
+      ...SETTLEMENT_SEQUENCE[0],
+      label: `Acompte de ${rail.value.deposit} € déjà reçu`,
+      detail: 'Déduit du total convenu après modification.',
+    },
+    {
+      ...SETTLEMENT_SEQUENCE[1],
+      label: `Reste à payer : ${rail.value.balanceFinal} €`,
+      detail: `Total ${rail.value.priceTotalV2} € − acompte ${rail.value.deposit} €.`,
+    },
+    {
+      ...SETTLEMENT_SEQUENCE[2],
+      label: `Inès paie les ${rail.value.balanceFinal} €`,
+      detail: 'Paiement final via la plateforme.',
+    },
+  ])
+
+  const memorizedPrefs = computed(() => [
+    rail.value.scalp,
+    `${rail.value.lengthLabel} + mèches fournies`,
+    rail.value.prestationLabel,
+  ])
 
   const isInjected = computed(() => state.value.injected)
   const invitationActive = computed(
@@ -120,7 +256,6 @@ export const useOpportunityStore = defineStore('opportunity', () => {
   const canSendProposal = computed(
     () =>
       state.value.canRealize &&
-      state.value.mechesIncluded &&
       state.value.offerReviewed &&
       !hasFirmProposal.value,
   )
@@ -212,7 +347,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
   const cardSummary = computed(() => ({
     title: `${rail.value.clientName} — ${rail.value.prestationLabel}`,
     slot: `${rail.value.dateLabel} à ${rail.value.timeLabel} · ${rail.value.place}`,
-    budget: `Budget maximum : ${rail.value.budgetMax} €`,
+    budget: `Budget max. ${rail.value.budgetMax} €`,
   }))
 
   function persist() {
@@ -274,7 +409,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
 
   /**
    * Simulateur déterministe : mêmes questions → mêmes réponses.
-   * Affiche une attente courte puis enrichit le dossier.
+   * Affiche une attente courte puis enrichit la demande.
    */
   function sendClarification() {
     if (!canSendClarification.value) return false
@@ -300,6 +435,12 @@ export const useOpportunityStore = defineStore('opportunity', () => {
         label: 'Réponse d’Inès',
         detail: responseLines.join(' '),
         photoAttached: true,
+        isNew: true,
+      })
+      pushTimeline({
+        label: 'Photo récente ajoutée',
+        detail: 'Fournie par Inès suite à votre demande de précision.',
+        isNew: true,
       })
       persist()
       notifySimulation('Inès vous a répondu')
@@ -334,13 +475,13 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.invitationStatus = InvitationStatus.REFUSED
     state.value.canRealize = false
     pushTimeline({
-      label: fromFeasibility ? 'Refus technique' : 'Demande refusée',
+      label: fromFeasibility ? 'Refus — non réalisable' : 'Demande refusée',
       detail: 'Aucune proposition envoyée.',
     })
     persist()
     notifyError(
       fromFeasibility
-        ? 'Refus technique enregistré — aucune proposition composée'
+        ? 'Refus enregistré — aucune proposition composée'
         : 'Demande refusée — aucune proposition envoyée',
     )
     return true
@@ -365,8 +506,8 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       snapshotBeforeRefuse: null,
     }
     pushTimeline({
-      label: 'Dossier Inès repris',
-      detail: 'Récupération démo — invitation restaurée.',
+      label: 'Demande d’Inès reprise',
+      detail: 'Invitation restaurée — vous pouvez continuer.',
     })
     persist()
     return true
@@ -397,13 +538,14 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.proposalStatus = ProposalStatus.DRAFT
     state.value.mechesIncluded = true
     persist()
-    notifySuccess('Faisabilité validée — vous réalisez (tension légère)')
+    notifySuccess('Décision enregistrée — vous réalisez')
     return true
   }
 
-  function setMechesIncluded(value) {
+  /** Mèches figées sur le rail démo — toujours incluses. */
+  function setMechesIncluded(_value) {
     if (!state.value.canRealize || hasFirmProposal.value) return
-    state.value.mechesIncluded = !!value
+    state.value.mechesIncluded = true
     persist()
   }
 
@@ -421,16 +563,16 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.firmProposalSentAt = new Date().toISOString()
     state.value.softHoldUntilLabel = `${rail.value.validityMinutes} min`
     pushTimeline({
-      label: 'Proposition ferme envoyée',
+      label: 'Proposition envoyée',
       detail: `${rail.value.priceTotal} € · acompte ${rail.value.deposit} € · ${rail.value.dateLabel} ${rail.value.timeLabel}`,
     })
     pushTimeline({
-      label: 'Créneau en réserve temporaire',
-      detail: `SOFT_HOLD · validité ${rail.value.validityMinutes} minutes`,
+      label: 'Créneau réservé temporairement',
+      detail: `Valable ${rail.value.validityMinutes} minutes`,
     })
     persist()
     notifySuccess(
-      `Proposition ferme envoyée — ${rail.value.priceTotal} € · acompte ${rail.value.deposit} €`,
+      `Proposition envoyée — ${rail.value.priceTotal} € · acompte ${rail.value.deposit} €`,
     )
     return true
   }
@@ -491,23 +633,23 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.paymentRef = `PAY-INES-${Date.now().toString(36).toUpperCase().slice(-8)}`
     pushTimeline({
       label: 'Proposition acceptée',
-      detail: 'Inès a accepté la proposition V1.',
+      detail: 'Inès a accepté votre proposition.',
     })
     pushTimeline({
-      label: 'Consentement enregistré',
-      detail: 'Règles de retard, annulation, préparation et pause.',
+      label: 'Règles acceptées',
+      detail: 'Retard, annulation, préparation et pause.',
     })
     pushTimeline({
-      label: 'Versement initial reçu',
-      detail: `${rail.value.deposit} € · solde prévisionnel ${rail.value.priceTotal - rail.value.deposit} €`,
+      label: 'Acompte reçu',
+      detail: `${rail.value.deposit} € · reste à payer ${rail.value.priceTotal - rail.value.deposit} €`,
     })
     pushTimeline({
       label: 'Rendez-vous confirmé',
-      detail: `COMMITTED · ${rail.value.dateLabel} ${rail.value.timeLabel}`,
+      detail: `${rail.value.dateLabel} ${rail.value.timeLabel}`,
     })
     pushTimeline({
-      label: 'Checklists de préparation créées',
-      detail: 'READINESS_PENDING',
+      label: 'Listes de préparation créées',
+      detail: 'Prochaine étape : préparer le rendez-vous.',
     })
     persist()
   }
@@ -558,11 +700,11 @@ export const useOpportunityStore = defineStore('opportunity', () => {
       state.value.readinessStatus = ReadinessStatus.READY
       pushTimeline({
         label: 'Préparation Inès confirmée',
-        detail: 'Checklist cliente complète (simulateur).',
+        detail: 'Checklist cliente complète.',
       })
       pushTimeline({
         label: 'Rendez-vous prêt',
-        detail: 'READY — toutes les conditions nécessaires sont satisfaites.',
+        detail: 'Tout est prêt des deux côtés.',
       })
       persist()
       notifySimulation('Inès a confirmé sa checklist')
@@ -571,13 +713,13 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     return true
   }
 
-  /** Compression temps explicite (C5) → seuil Acte D. */
+  /** Compression temps (C5) → jour du rendez-vous. */
   function continueDemoToDayJ() {
     if (!canContinueDemo.value) return false
     state.value.dayJAdvanced = true
     pushTimeline({
-      label: 'Compression démo',
-      detail: 'Avance au jour J — dossier du jour disponible.',
+      label: 'Jour du rendez-vous',
+      detail: 'Demande du jour disponible.',
     })
     persist()
     return true
@@ -594,7 +736,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.pearlsEventHandled = false
     pushTimeline({
       label: 'Prestation démarrée',
-      detail: `IN_PROGRESS · début ${rail.value.startTimeLabel}`,
+      detail: `Début ${rail.value.startTimeLabel}`,
     })
     persist()
 
@@ -632,8 +774,9 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.pearlsEventHandled = true
     state.value.modificationRefused = false
     state.value.modificationRefusalReasonId = null
-    state.value.selectedSupplementId = null
-    state.value.selectedExtraDurationId = null
+    // Valeurs figées du parcours (+10 € · +20 min) — pas de faux choix.
+    state.value.selectedSupplementId = '10'
+    state.value.selectedExtraDurationId = '20'
     state.value.selectedMotifId = 'option'
     state.value.modificationSequencePhase = 'idle'
     state.value.modificationSequenceStep = -1
@@ -650,7 +793,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.modificationRefusalReasonId = reasonId
     pushTimeline({
       label: 'Modification refusée',
-      detail: 'V1 inchangée — récupération démo disponible.',
+      detail: 'Proposition initiale inchangée.',
     })
     persist()
     return true
@@ -664,7 +807,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.pearlsEventOpen = true
     pushTimeline({
       label: 'Évaluation reprise',
-      detail: 'Récupération démo — événement perles réouvert.',
+      detail: 'Demande de perles réouverte.',
     })
     persist()
     return true
@@ -738,10 +881,10 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.modificationAcceptedAtLabel = rail.value.modificationAcceptedAt
     pushTimeline({
       label: 'Modification acceptée',
-      detail: `Engagement V2 actif · ${rail.value.modificationAcceptedAt}`,
+      detail: `Perles ajoutées · ${rail.value.modificationAcceptedAt}`,
     })
     pushTimeline({
-      label: 'Preuves V1 / V2 conservées',
+      label: 'Nouveau total enregistré',
       detail: `Total ${rail.value.priceTotalV2} € · durée ${rail.value.durationLabelV2}`,
     })
     persist()
@@ -752,18 +895,17 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.serviceResumedAfterV2 = true
     pushTimeline({
       label: 'Prestation reprise',
-      detail: `Totaux V2 · ${rail.value.priceTotalV2} € · ${rail.value.durationLabelV2}`,
+      detail: `${rail.value.priceTotalV2} € · ${rail.value.durationLabelV2}`,
     })
     persist()
     return true
   }
 
-  /** D4 — qualification de fin. */
+  /** D4 — fin de prestation (rail = réalisation complète uniquement). */
   function qualifyCompletion(choiceId) {
     if (!canQualifyCompletion.value) return false
     if (choiceId !== 'full') {
-      state.value.completionChoiceId = choiceId
-      persist()
+      // Hors parcours : ne pas activer — rester sur l’option complète.
       return false
     }
     state.value.completionChoiceId = 'full'
@@ -771,7 +913,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.completedAtLabel = nowLabel()
     pushTimeline({
       label: 'Prestation terminée',
-      detail: `COMPLETED · ${rail.value.priceTotalV2} € · ${rail.value.durationLabelV2}`,
+      detail: `${rail.value.priceTotalV2} € · ${rail.value.durationLabelV2}`,
     })
     persist()
     return true
@@ -827,8 +969,8 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.finalPaymentAtLabel = at
     state.value.finalPaymentRef = `PAY-FINAL-${Date.now().toString(36).toUpperCase().slice(-8)}`
     pushTimeline({
-      label: 'Versement initial imputé',
-      detail: `${rail.value.deposit} € sur total ${rail.value.priceTotalV2} €`,
+      label: 'Acompte déjà payé',
+      detail: `${rail.value.deposit} € déduits du total ${rail.value.priceTotalV2} €`,
     })
     pushTimeline({
       label: 'Solde réglé',
@@ -836,7 +978,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     })
     pushTimeline({
       label: 'Règlement terminé',
-      detail: `SETTLED · net ${rail.value.netRevenue} € (frais ${rail.value.platformFee} €)`,
+      detail: `Net ${rail.value.netRevenue} € (frais ${rail.value.platformFee} €)`,
     })
     pushTimeline({
       label: 'Avis publié',
@@ -885,7 +1027,7 @@ export const useOpportunityStore = defineStore('opportunity', () => {
     state.value.favoriteAcknowledged = true
     pushTimeline({
       label: 'Relation constatée',
-      detail: 'Inès vous a ajoutée à ses favorites · préférences mémorisées.',
+      detail: 'Inès vous a ajoutée à ses coups de cœur · préférences mémorisées.',
     })
     persist()
     return true
@@ -899,6 +1041,10 @@ export const useOpportunityStore = defineStore('opportunity', () => {
   return {
     state,
     rail,
+    matchCriteria,
+    engagementSequence,
+    settlementSequence,
+    memorizedPrefs,
     isInjected,
     invitationActive,
     invitationRefused,

@@ -60,7 +60,7 @@ const { framework } = storeToRefs(store)
         Non acceptés
       </button>
 
-      <label class="field-label mt-6">Consigne d’accès</label>
+      <label class="field-label mt-6">Comment trouver / entrer (digicode, étage…)</label>
       <input
         class="w-full rounded-card border border-outline-soft bg-surface px-3 py-3 text-sm"
         :value="framework.accessNote"

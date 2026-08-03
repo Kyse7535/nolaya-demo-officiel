@@ -31,7 +31,7 @@ function isLengthEnabled(id) {
         prix.
       </p>
 
-      <p class="field-label mt-6">Catalogue</p>
+      <p class="field-label mt-6">Type de prestation</p>
       <div class="space-y-2">
         <button
           v-for="p in PRESTATION_CATALOG"
@@ -62,7 +62,7 @@ function isLengthEnabled(id) {
 
       <p class="field-label mt-6">Longueurs proposées</p>
       <p class="mb-2 text-xs text-muted">
-        La plus courte activée servira de longueur de référence pour le tarif.
+        La plus courte activée servira de longueur de départ pour le prix.
       </p>
       <div class="space-y-2">
         <button
@@ -76,10 +76,10 @@ function isLengthEnabled(id) {
           <span class="flex items-center justify-between gap-2">
             <span>
               {{ l.label }}
-              <span v-if="index === 0" class="ml-1 text-xs text-muted">(réf. suggérée)</span>
+              <span v-if="index === 0" class="ml-1 text-xs text-muted">(longueur de départ)</span>
             </span>
             <span class="text-xs font-semibold text-secondary">
-              {{ isLengthEnabled(l.id) ? 'Activée' : 'Off' }}
+              {{ isLengthEnabled(l.id) ? 'Activée' : 'Non' }}
             </span>
           </span>
         </button>

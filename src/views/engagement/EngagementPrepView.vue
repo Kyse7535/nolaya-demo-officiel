@@ -35,14 +35,28 @@ watch(
 
 const statusBadge = computed(() => {
   if (state.value.dayJAdvanced) return 'Jour J'
-  if (isReady.value) return 'READY'
-  return 'Préparation'
+  if (isReady.value) return 'Prêt'
+  return 'En préparation'
 })
 
 const statusMono = computed(() => {
-  if (state.value.dayJAdvanced) return 'Seuil · Acte D'
-  if (isReady.value) return 'État · READY'
-  return 'État · READINESS_PENDING'
+  if (state.value.dayJAdvanced) return 'Jour du rendez-vous'
+  if (isReady.value) return 'Prêt'
+  return 'En préparation'
+})
+
+/** Checklist Inès alignée sur la consigne d’offre (lavés / démêlés). */
+const inesChecklistItems = computed(() => {
+  const note = String(rail.value.clientTasks || '').toLowerCase()
+  return INES_CHECKLIST.map((item) => {
+    if (item.id === 'laves' && note.includes('lav')) {
+      return { ...item, label: 'Cheveux lavés' }
+    }
+    if (item.id === 'demesles' && (note.includes('démêl') || note.includes('demel'))) {
+      return { ...item, label: 'Cheveux démêlés' }
+    }
+    return item
+  })
 })
 
 function toggleSarah(id, checked) {
@@ -55,13 +69,12 @@ function confirmPrep() {
 
 function continueDemo() {
   if (opportunity.continueDemoToDayJ()) {
-    // Reste sur l’écran pont : formulaire acte C, puis « Ouvrir le dossier du jour ».
     window.setTimeout(() => demo.promptActFeedback('C'), 280)
   }
 }
 
-function goDayDossier() {
-  router.push({ name: 'execution-dossier' })
+function goDayJ() {
+  router.push({ name: 'execution-jour' })
 }
 </script>
 
@@ -70,7 +83,7 @@ function goDayDossier() {
     <ScreenHeader
       title="Préparation"
       :badge="statusBadge"
-      back-label="Engagement"
+      back-label="Confirmation"
       @back="router.push({ name: 'engagement-committed' })"
     />
 
@@ -81,8 +94,7 @@ function goDayDossier() {
       <p class="badge-mono">{{ statusMono }}</p>
       <h2 class="mt-2 screen-title">Préparer le rendez-vous</h2>
       <p class="screen-lead">
-        Deux checklists distinctes. Vous cochez la vôtre ; Inès confirme la sienne après votre
-        validation.
+        Cochez votre liste. Inès confirmera la sienne ensuite.
       </p>
 
       <!-- Checklist Sarah (C3) -->
@@ -143,7 +155,7 @@ function goDayDossier() {
 
         <ul class="mt-3 space-y-2">
           <li
-            v-for="item in INES_CHECKLIST"
+            v-for="item in inesChecklistItems"
             :key="item.id"
             class="rounded-card border px-4 py-3 transition"
             :class="
@@ -182,32 +194,33 @@ function goDayDossier() {
         </p>
       </section>
 
-      <!-- READY + compression (C5) -->
+      <!-- Prêt + compression (C5) -->
       <section
         v-if="isReady"
         class="mt-7 rounded-card border border-secondary/40 bg-secondary-container/25 px-4 py-4"
       >
         <p class="text-sm font-semibold text-on-secondary-container">
-          Toutes les conditions nécessaires sont satisfaites.
+          Tout est prêt des deux côtés.
         </p>
         <p class="mt-2 text-sm text-muted">
-          Le rendez-vous est le {{ rail.dateLabel }} — la démo peut avancer au jour J.
+          Le rendez-vous est le {{ rail.dateLabel }}. Dans la vraie vie, vous attendriez cette date —
+          ici, vous pouvez passer directement au jour du rendez-vous.
         </p>
       </section>
 
-      <!-- Pont Acte D -->
+      <!-- Pont jour J -->
       <section
         v-if="state.dayJAdvanced"
         class="mt-5 rounded-card border border-secondary/40 bg-secondary-container/25 px-4 py-4"
       >
-        <p class="badge-mono">Acte D · Scène 4/5</p>
-        <h3 class="mt-2 text-sm font-semibold text-on-secondary-container">Dossier du jour</h3>
+        <p class="badge-mono">Demande du jour</p>
+        <h3 class="mt-2 text-sm font-semibold text-on-secondary-container">Demande du jour</h3>
         <p class="mt-1 text-sm text-muted">
           {{ rail.clientName }} · {{ rail.timeLabel }} · {{ rail.prestationLabel }} ·
-          {{ rail.priceTotal }} € · préparation complète (READY).
+          {{ rail.priceTotal }} € · préparation complète.
         </p>
-        <button type="button" class="btn-primary mt-4" @click="goDayDossier">
-          Ouvrir le dossier du jour
+        <button type="button" class="btn-primary mt-4" @click="goDayJ">
+          Ouvrir la demande du jour
         </button>
         <button
           type="button"
@@ -216,8 +229,8 @@ function goDayDossier() {
         >
           {{
             demo.isFeedbackSubmitted('C')
-              ? 'Revoir mon retour (acte C)'
-              : 'Donner mon retour sur cet acte'
+              ? 'Revoir mon avis sur cette étape'
+              : 'Donner mon avis sur cette étape'
           }}
         </button>
       </section>
@@ -236,11 +249,9 @@ function goDayDossier() {
 
     <StickyFooter
       v-else-if="canContinueDemo"
-      label="Continuer la démonstration"
+      label="Passer au jour du rendez-vous"
       @action="continueDemo"
-    >
-      <p class="mt-2 text-center text-[11px] text-muted">Avance explicite au jour J</p>
-    </StickyFooter>
+    />
 
     <!-- Sheet consignes -->
     <div
@@ -249,12 +260,12 @@ function goDayDossier() {
       @click.self="consignesOpen = false"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Consignes particulières</p>
+        <p class="badge-mono">Consignes du rendez-vous</p>
         <h2 class="mt-2 text-base font-bold text-primary">Rappel pour ce rendez-vous</h2>
         <ul class="mt-4 space-y-2 text-sm text-primary">
-          <li>{{ rail.scalp }} — adapter la tension</li>
+          <li>{{ rail.scalp }} — adapter la coiffure / la tension</li>
           <li>Priorité cliente : {{ rail.priority }}</li>
-          <li>Tension légère prévue dans l’offre acceptée</li>
+          <li>Préparation cliente : {{ rail.clientTasks }}</li>
         </ul>
         <button type="button" class="btn-primary mt-5" @click="consignesOpen = false">
           Fermer

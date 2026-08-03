@@ -23,7 +23,8 @@ const { framework } = storeToRefs(store)
       <h2 class="screen-title">Communication et paiement</h2>
       <p class="screen-lead">Comment on vous joint, et comment vous êtes payée.</p>
 
-      <p class="field-label mt-6">Canal</p>
+      <p class="field-label mt-6">Où vous écrire</p>
+      <p class="mb-2 text-xs text-muted">Plusieurs choix possibles.</p>
       <div class="space-y-2">
         <button
           v-for="opt in CHANNEL_OPTIONS"
@@ -37,7 +38,7 @@ const { framework } = storeToRefs(store)
         </button>
       </div>
 
-      <p class="field-label mt-6">Délai de réponse à un message (indicatif)</p>
+      <p class="field-label mt-6">Temps de réponse habituel</p>
       <p class="mb-2 text-xs text-muted">
         Temps dans lequel vous essayez de répondre quand une cliente vous écrit.
       </p>
@@ -48,6 +49,7 @@ const { framework } = storeToRefs(store)
       />
 
       <p class="field-label mt-6">Moyens de paiement acceptés</p>
+      <p class="mb-2 text-xs text-muted">Plusieurs choix possibles.</p>
       <div class="space-y-2">
         <button
           v-for="opt in PAYMENT_OPTIONS"

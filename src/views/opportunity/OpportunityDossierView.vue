@@ -1,9 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
-import { REFUSAL_REASONS } from '../../domain/model'
+import { CLARIFICATION_QUESTIONS, REFUSAL_REASONS } from '../../domain/model'
 import { useOpportunityStore } from '../../stores/opportunity'
 
 const router = useRouter()
@@ -22,16 +22,45 @@ const {
 const refuseOpen = ref(false)
 const refuseReason = ref('')
 
-const dossierRows = computed(() => [
-  { label: 'Résultat souhaité', value: `Knotless medium, longueur ${rail.value.lengthLabel}` },
+const demandRows = computed(() => [
+  {
+    label: 'Résultat souhaité',
+    value: `${rail.value.prestationLabel}, longueur ${rail.value.lengthLabel}`,
+  },
   { label: 'Inspiration', value: rail.value.inspirationLabel },
   { label: 'Cheveux et confort', value: `${rail.value.hairType}, ${rail.value.scalp.toLowerCase()}` },
-  { label: 'Date et lieu', value: `${rail.value.dateLabel}, ${rail.value.timeLabel}, ${rail.value.place}` },
-  { label: 'Budget', value: `Cible ${rail.value.budgetTarget} €, maximum ${rail.value.budgetMax} €` },
+  {
+    label: 'Date et lieu',
+    value: `${rail.value.dateLabel}, ${rail.value.timeLabel}, ${rail.value.place}`,
+  },
+  {
+    label: 'Budget',
+    value: `Cible ${rail.value.budgetTarget} €, maximum ${rail.value.budgetMax} €`,
+  },
   { label: 'Fournitures', value: rail.value.supplies },
-  { label: 'Tâches cliente', value: rail.value.clientTasks },
-  { label: 'Priorité', value: rail.value.priority },
+  { label: 'Préparation demandée à la cliente', value: rail.value.clientTasks },
+  { label: 'Ce qui compte pour elle', value: rail.value.priority },
 ])
+
+const visibleTimeline = computed(() => state.value.timeline.slice(-5))
+
+const hasNewAdditions = computed(
+  () => isEnriched.value && (state.value.hasRecentPhoto || state.value.timeline.some((t) => t.isNew)),
+)
+
+const newTextAnswers = computed(() => {
+  if (!isEnriched.value) return []
+  return CLARIFICATION_QUESTIONS.filter(
+    (q) => q.id !== 'photo' && state.value.selectedQuestionIds.includes(q.id),
+  ).map((q) => ({ id: q.id, label: q.label, response: q.response }))
+})
+
+const newAdditionsCount = computed(() => {
+  let n = 0
+  if (state.value.hasRecentPhoto) n += 1
+  n += newTextAnswers.value.length
+  return n
+})
 
 /** Clarifier encore possible — primary tant que la précision n’est pas demandée. */
 const canClarify = computed(
@@ -56,7 +85,7 @@ const proposalCta = computed(() => {
       label: 'Préparer une proposition',
       primary: false,
       disabled: true,
-      why: 'Une photo récente est requise pour évaluer la faisabilité',
+      why: 'Une photo récente est requise pour décider si vous pouvez réaliser',
     }
   }
   if (state.value.canRealize) {
@@ -69,7 +98,6 @@ const proposalCta = computed(() => {
   }
   return {
     label: 'Préparer une proposition',
-    // Primary seulement si clarifier n’est plus l’action utile
     primary: !!state.value.clarificationSent || isEnriched.value,
     disabled: false,
     why: null,
@@ -98,6 +126,12 @@ const refuseCta = computed(() => {
   }
 })
 
+function scrollToNewAdditions() {
+  nextTick(() => {
+    document.getElementById('nouveaux-ajouts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
 function goClarify() {
   if (!canClarify.value) return
   router.push({ name: 'opportunity-clarification' })
@@ -123,7 +157,7 @@ function confirmRefuse() {
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Dossier demande"
+      title="Demande d’Inès"
       badge="Inès"
       @back="router.push({ name: 'opportunity-list' })"
     />
@@ -136,16 +170,16 @@ function confirmRefuse() {
       >
         <p class="text-sm font-semibold text-primary">Demande refusée — aucune proposition envoyée.</p>
         <p class="mt-2 text-sm text-muted">
-          Récupération démo : vous pouvez reprendre le dossier Inès pour continuer le parcours.
+          Vous pouvez reprendre la demande d’Inès pour continuer.
         </p>
         <button type="button" class="btn-primary mt-4" @click="opportunity.recoverInes()">
-          Reprendre le dossier Inès
+          Reprendre la demande d’Inès
         </button>
       </div>
 
       <template v-else>
         <h2 class="screen-title">{{ rail.clientName }} — {{ rail.prestationLabel }}</h2>
-        <p class="screen-lead">Décidez à partir d’un dossier structuré, sans messagerie libre.</p>
+        <p class="screen-lead">Tout est regroupé ici pour décider.</p>
 
         <div
           v-if="missingPhotoAlert"
@@ -156,16 +190,34 @@ function confirmRefuse() {
         </div>
 
         <div
-          v-else-if="isEnriched"
-          class="mt-4 rounded-card border border-secondary/30 bg-secondary-container/20 px-3 py-3"
+          v-if="hasNewAdditions"
+          class="sticky top-12 z-20 mt-4 rounded-card border border-secondary/40 bg-secondary-container/30 px-3 py-3 shadow-sm"
         >
-          <p class="text-sm font-semibold text-on-secondary-container">Dossier enrichi</p>
-          <p class="mt-1 text-sm text-muted">Photo récente jointe · précisions reçues</p>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-semibold text-on-secondary-container">
+                {{ newAdditionsCount }} nouvel{{ newAdditionsCount > 1 ? 's' : '' }} ajout{{
+                  newAdditionsCount > 1 ? 's' : ''
+                }}
+              </p>
+              <p class="mt-1 text-sm text-muted">
+                Réponse à votre demande de précision — photo et réponses d’Inès.
+              </p>
+            </div>
+            <span
+              class="shrink-0 rounded-card bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-secondary"
+            >
+              Nouveau
+            </span>
+          </div>
+          <button type="button" class="btn-secondary mt-3" @click="scrollToNewAdditions">
+            Voir les ajouts
+          </button>
         </div>
 
         <dl class="mt-5 space-y-2">
           <div
-            v-for="row in dossierRows"
+            v-for="row in demandRows"
             :key="row.label"
             class="rounded-card border border-outline-soft bg-surface px-3 py-3"
           >
@@ -174,15 +226,59 @@ function confirmRefuse() {
           </div>
         </dl>
 
-        <!-- Photo mock après enrichissement -->
+        <!-- Zone ajouts après précision (photo + réponses texte) -->
         <div
-          v-if="state.hasRecentPhoto"
-          class="mt-3 overflow-hidden rounded-card border border-outline-soft"
+          v-if="hasNewAdditions"
+          id="nouveaux-ajouts"
+          class="mt-4 space-y-3 scroll-mt-28"
         >
+          <p class="text-xs font-semibold uppercase tracking-wide text-secondary">
+            Ajouts après précision
+          </p>
+
           <div
-            class="flex h-28 items-end bg-gradient-to-br from-[#2c2418] to-[#a17f3c] px-3 py-2"
+            v-if="state.hasRecentPhoto"
+            class="overflow-hidden rounded-card border-2 border-secondary"
           >
-            <p class="text-xs font-medium text-white/90">Photo récente · fournie par Inès</p>
+            <div class="flex items-center justify-between gap-2 bg-secondary-container/40 px-3 py-1.5">
+              <p class="text-[10px] font-bold uppercase tracking-wide text-on-secondary-container">
+                Réponse à votre demande de photo
+              </p>
+              <span
+                class="rounded-card bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-secondary"
+              >
+                Nouveau
+              </span>
+            </div>
+            <div
+              class="relative flex h-36 items-end bg-gradient-to-br from-[#2c2418] via-[#5c4420] to-[#a17f3c] px-3 py-2"
+            >
+              <div
+                class="absolute inset-4 rounded-card border border-white/20 bg-white/10 backdrop-blur-[1px]"
+                aria-hidden="true"
+              />
+              <p class="relative text-xs font-semibold text-white">
+                Photo récente · fournie par Inès
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-for="answer in newTextAnswers"
+            :key="answer.id"
+            class="rounded-card border-2 border-secondary bg-secondary-container/15 px-3 py-3"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-[10px] font-bold uppercase tracking-wide text-on-secondary-container">
+                {{ answer.label }}
+              </p>
+              <span
+                class="shrink-0 rounded-card bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-on-secondary"
+              >
+                Nouveau
+              </span>
+            </div>
+            <p class="mt-1.5 text-sm font-medium text-primary">{{ answer.response }}</p>
           </div>
         </div>
 
@@ -190,17 +286,29 @@ function confirmRefuse() {
           <h3 class="text-xs font-semibold uppercase tracking-wide text-muted">Chronologie</h3>
           <ul class="mt-2 space-y-2">
             <li
-              v-for="item in state.timeline"
+              v-for="item in visibleTimeline"
               :key="item.id"
-              class="rounded-card border border-outline-soft bg-surface-low px-3 py-2"
+              class="rounded-card border px-3 py-2"
+              :class="
+                item.isNew
+                  ? 'border-secondary bg-secondary-container/20'
+                  : 'border-outline-soft bg-surface-low'
+              "
             >
-              <p class="text-sm font-medium text-primary">{{ item.label }}</p>
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-sm font-medium text-primary">{{ item.label }}</p>
+                <span
+                  v-if="item.isNew"
+                  class="shrink-0 rounded-card bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-secondary"
+                >
+                  Nouveau
+                </span>
+              </div>
               <p class="mt-0.5 text-xs text-muted">{{ item.at }} · {{ item.detail }}</p>
             </li>
           </ul>
         </section>
 
-        <!-- Carrefour B2 / B3 — un primary, états explicites -->
         <div class="mt-8 space-y-2">
           <button
             v-if="canClarify"
@@ -243,7 +351,6 @@ function confirmRefuse() {
             {{ refuseCta.why }}
           </p>
 
-          <!-- Consultation reste disponible après envoi -->
           <template v-if="hasFirmProposal">
             <button type="button" class="btn-primary" @click="goFollowUp">
               Voir le suivi

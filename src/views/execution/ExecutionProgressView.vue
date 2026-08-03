@@ -26,17 +26,21 @@ const refuseReasonId = ref(null)
 
 const events = computed(() =>
   state.value.timeline.filter((t) =>
-    /démarr|modification|Prestation|perles|V2|reprise|refus/i.test(
+    /démarr|modification|Prestation|perles|reprise|refus/i.test(
       `${t.label} ${t.detail || ''}`,
     ),
   ),
+)
+
+const engagementLabel = computed(() =>
+  isV2.value ? 'Modifiée (perles)' : 'Prestation en cours',
 )
 
 watch(
   () => state.value.executionStatus,
   (status) => {
     if (status === 'NONE' || !status) {
-      router.replace({ name: 'execution-dossier' })
+      router.replace({ name: 'execution-jour' })
     }
   },
   { immediate: true },
@@ -66,26 +70,32 @@ function goModification() {
 function finish() {
   router.push({ name: 'execution-complete' })
 }
+
+const showPrimaryEventCta = computed(
+  () =>
+    (!state.value.pearlsEventHandled && !state.value.pearlsEventOpen && !isV2.value) ||
+    (state.value.pearlsEventHandled && !isV2.value && !state.value.modificationRefused),
+)
 </script>
 
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
       title="Prestation en cours"
-      badge="IN_PROGRESS"
-      back-label="Dossier"
-      @back="router.push({ name: 'execution-dossier' })"
+      badge="En cours"
+      back-label="Demande"
+      @back="router.push({ name: 'execution-jour' })"
     />
 
     <div
       class="flex-1 px-5 py-5"
-      :class="canQualifyCompletion || state.modificationRefused ? 'pb-36' : 'pb-28'"
+      :class="canQualifyCompletion || state.modificationRefused || showPrimaryEventCta ? 'pb-36' : 'pb-28'"
     >
-      <p class="badge-mono">{{ isV2 ? 'Engagement · V2' : 'Engagement · V1' }}</p>
+      <p class="badge-mono">{{ engagementLabel }}</p>
       <h2 class="mt-2 screen-title">{{ rail.clientName }} · en réalisation</h2>
       <p class="screen-lead">
-        Début réel {{ state.startedAtLabel || rail.startTimeLabel }}. Les totaux suivent
-        l’engagement actif.
+        Début réel {{ state.startedAtLabel || rail.startTimeLabel }}. Prix et durée affichés =
+        ce qui est convenu maintenant.
       </p>
 
       <dl class="mt-5 grid grid-cols-2 gap-2">
@@ -104,7 +114,7 @@ function finish() {
         class="btn-ghost mt-3 text-xs"
         @click="sheet = isV2 ? 'v2' : 'v1'"
       >
-        Voir la prestation convenue ({{ isV2 ? 'V2' : 'V1' }})
+        Voir la prestation convenue
       </button>
 
       <section class="mt-6">
@@ -126,9 +136,9 @@ function finish() {
         v-if="state.modificationRefused"
         class="mt-6 rounded-card border border-outline-soft bg-surface-low px-4 py-4"
       >
-        <p class="text-sm font-semibold text-primary">Modification refusée — V1 inchangée</p>
+        <p class="text-sm font-semibold text-primary">Modification refusée — accord initial inchangé</p>
         <p class="mt-1 text-sm text-muted">
-          L’engagement à {{ rail.priceTotal }} € / {{ rail.durationLabel }} reste actif.
+          L’accord à {{ rail.priceTotal }} € / {{ rail.durationLabel }} reste actif.
         </p>
         <button type="button" class="btn-primary mt-4" @click="recover">
           Reprendre l’évaluation
@@ -140,11 +150,11 @@ function finish() {
         class="mt-6 rounded-card border border-secondary/40 bg-secondary-container/25 px-4 py-4"
       >
         <p class="text-sm font-semibold text-on-secondary-container">
-          Modification V2 intégrée
+          Modification intégrée
         </p>
         <p class="mt-1 text-sm text-muted">
           Perles acceptées · {{ rail.priceTotalV2 }} € · {{ rail.durationLabelV2 }}. Vous pouvez
-          clôturer la prestation.
+          terminer la prestation.
         </p>
       </section>
 
@@ -153,23 +163,23 @@ function finish() {
         class="mt-6 rounded-card border border-secondary/40 bg-secondary-container/25 px-4 py-4"
       >
         <p class="text-sm font-semibold text-on-secondary-container">
-          Modification acceptée — V2 active
+          Modification acceptée
         </p>
         <p class="mt-1 text-sm text-muted">
-          Consultez les preuves puis reprenez la réalisation aux totaux V2.
+          Consultez ce qui a été accepté, puis reprenez aux nouveaux totaux.
         </p>
         <button type="button" class="btn-primary mt-4" @click="goModification">
-          Voir les preuves V2
+          Voir le détail
         </button>
       </section>
 
       <button
         v-if="!state.pearlsEventHandled && !state.pearlsEventOpen && !isV2"
         type="button"
-        class="btn-secondary mt-6"
+        class="btn-primary mt-6"
         @click="opportunity.openPearlsEvent()"
       >
-        Signaler un événement
+        Simuler : Inès demande des perles
       </button>
       <button
         v-else-if="state.pearlsEventHandled && !isV2 && !state.modificationRefused"
@@ -177,7 +187,7 @@ function finish() {
         class="btn-primary mt-6"
         @click="goModification"
       >
-        Continuer la composition
+        Proposer la modification
       </button>
       <button
         v-else-if="isV2 && state.serviceResumedAfterV2"
@@ -196,13 +206,13 @@ function finish() {
     />
     <StickyFooter
       v-else-if="canResumeAfterV2"
-      label="Voir les preuves V2"
+      label="Voir le détail"
       @action="goModification"
     />
     <StickyFooter
-      v-else-if="isInProgress && !state.modificationRefused"
-      label="Dossier du jour"
-      @action="router.push({ name: 'execution-dossier' })"
+      v-else-if="isInProgress && !state.modificationRefused && !showPrimaryEventCta"
+      label="Demande du jour"
+      @action="router.push({ name: 'execution-jour' })"
     />
 
     <!-- Modal événement perles (D1) -->
@@ -212,13 +222,19 @@ function finish() {
       @click.self="opportunity.closePearlsEvent()"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5 shadow-lg">
-        <p class="badge-mono">Événement · Modification</p>
+        <p class="badge-mono">Modification demandée</p>
         <h2 class="mt-2 text-lg font-bold text-primary">
-          {{ rail.clientName }} demande une modification
+          On fixe le supplément ici pour éviter un malentendu à la fin
         </h2>
         <p class="mt-2 text-sm text-muted">
-          Ajouter des perles à la coiffure. L’engagement V1 reste actif jusqu’à ce qu’une
-          modification soit acceptée.
+          {{ rail.clientName }} demande d’ajouter des perles. L’accord actuel reste valable
+          jusqu’à ce qu’elle accepte le nouveau prix et la durée.
+        </p>
+        <p
+          class="mt-3 rounded-card border border-secondary/30 bg-secondary-container/20 px-3 py-2.5 text-sm font-semibold leading-relaxed text-on-secondary-container"
+        >
+          À faire dans l’app : sans accord écrit sur le prix et le temps en plus, un « ok » à
+          l’oral crée souvent un malentendu après le rendez-vous.
         </p>
         <button type="button" class="btn-primary mt-5" @click="evaluate">
           Évaluer la modification
@@ -240,7 +256,7 @@ function finish() {
       @click.self="refuseOpen = false"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Refus structuré</p>
+        <p class="badge-mono">Refus</p>
         <h2 class="mt-2 text-base font-bold text-primary">Motif du refus</h2>
         <ul class="mt-4 space-y-2">
           <li v-for="reason in MODIFICATION_REFUSAL_REASONS" :key="reason.id">
@@ -268,14 +284,16 @@ function finish() {
       </div>
     </div>
 
-    <!-- Sheets V1 / V2 -->
+    <!-- Sheets avant / après modification -->
     <div
       v-if="sheet"
       class="fixed inset-0 z-50 flex items-end bg-primary/40"
       @click.self="sheet = null"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Engagement · {{ sheet.toUpperCase() }}</p>
+        <p class="badge-mono">
+          {{ sheet === 'v2' ? 'Après modification' : 'Proposition acceptée' }}
+        </p>
         <h2 class="mt-2 text-base font-bold text-primary">Prestation convenue</h2>
         <ul class="mt-4 space-y-2 text-sm text-primary">
           <li>{{ rail.prestationLabel }} · {{ rail.lengthLabel }}</li>

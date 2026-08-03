@@ -8,7 +8,7 @@ const offerStore = useOfferStore()
 
 const pillars = [
   { title: 'Prestation', body: 'Le service et les longueurs que vous proposez.' },
-  { title: 'Galerie', body: 'Des photos de cette prestation, avec un niveau de preuve clair.' },
+  { title: 'Galerie', body: 'Des photos de cette prestation (pas de tout votre portfolio).' },
   {
     title: 'Préparation',
     body: 'Ce que vous faites, et ce que la cliente prépare avant le rendez-vous (ex. cheveux lavés).',

@@ -58,7 +58,7 @@ function activate() {
         <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Contextes</dt>
+              <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Lieux de travail</dt>
               <dd class="mt-1 text-sm text-primary">
                 {{ contextsText() }} ·
                 {{ framework.addressPrivate ? 'adresse masquée' : 'adresse visible' }}
@@ -121,7 +121,7 @@ function activate() {
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">
-                Politiques & photos
+                Règles & photos
               </dt>
               <dd class="mt-1 text-sm text-primary">
                 Retard {{ framework.lateTolerance }} min ·

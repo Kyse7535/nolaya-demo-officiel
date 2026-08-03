@@ -43,6 +43,15 @@
     @apply pointer-events-none cursor-not-allowed opacity-55;
   }
 
+  /* Règle plateforme figée — neutre, pas un choix sélectionné */
+  .platform-rule {
+    @apply pointer-events-none cursor-not-allowed rounded-card border border-outline-soft/80 bg-surface-container/80 px-4 py-3 text-left text-sm text-muted;
+  }
+
+  .platform-rule__tag {
+    @apply mt-1 block text-[11px] font-medium text-muted;
+  }
+
   .badge-mono {
     @apply inline-flex rounded-card bg-surface-container px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-muted;
   }

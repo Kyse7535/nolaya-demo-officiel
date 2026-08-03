@@ -15,7 +15,7 @@ watch(
   () => state.value.clarificationWaiting,
   (waiting, wasWaiting) => {
     if (wasWaiting && !waiting && isEnriched.value) {
-      router.replace({ name: 'opportunity-dossier' })
+      router.replace({ name: 'opportunity-demande' })
     }
   },
 )
@@ -33,28 +33,25 @@ function send() {
   <div class="flex flex-1 flex-col">
     <ScreenHeader
       title="Clarification"
-      badge="Panneau"
-      @back="router.push({ name: 'opportunity-dossier' })"
+      badge="Précision"
+      @back="router.push({ name: 'opportunity-demande' })"
     />
 
     <div class="flex-1 px-5 py-5 pb-28">
       <h2 class="screen-title">Demander une précision</h2>
       <p class="screen-lead">
-        Cochez au moins une précision pour activer l’envoi. Ce n’est pas une messagerie libre —
-        Inès répondra de façon déterministe.
+        Choisissez une ou plusieurs questions. Inès répondra tout de suite.
       </p>
 
       <div v-if="state.clarificationWaiting" class="mt-8 rounded-card border border-outline-soft bg-surface p-5 text-center">
         <p class="text-sm font-semibold text-primary">Inès consulte votre demande…</p>
-        <p class="mt-2 text-sm text-muted">Réponse préparée en cours d’affichage.</p>
+        <p class="mt-2 text-sm text-muted">Réponse simulée d’Inès en cours d’affichage.</p>
       </div>
 
       <template v-else-if="state.clarificationSent">
         <div class="mt-6 rounded-card border border-secondary/40 bg-secondary-container/30 p-4">
           <p class="text-sm font-semibold text-on-secondary-container">Réponse reçue</p>
-          <p class="mt-2 text-sm text-primary">
-            Voici une photo récente. Je n’ai pas fait de défrisage depuis huit mois.
-          </p>
+          <p class="mt-2 text-sm text-primary">Voici une photo récente.</p>
           <p
             v-if="state.selectedQuestionIds.includes('allergies')"
             class="mt-2 text-sm text-primary"
@@ -65,9 +62,9 @@ function send() {
         <button
           type="button"
           class="btn-primary mt-6"
-          @click="router.push({ name: 'opportunity-dossier' })"
+          @click="router.push({ name: 'opportunity-demande' })"
         >
-          Retour au dossier enrichi
+          Retour à la demande
         </button>
       </template>
 

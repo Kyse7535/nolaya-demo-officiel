@@ -20,7 +20,7 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Votre droit à la pause</h2>
+      <h2 class="screen-title">Vos pauses pendant une longue prestation</h2>
       <p class="screen-lead">
         Pendant une prestation longue, vous pouvez prévoir des pauses. Elles font partie de votre
         cadre.
@@ -41,8 +41,7 @@ const { framework } = storeToRefs(store)
       </div>
 
       <p class="mt-5 rounded-card bg-surface-low px-3 py-3 text-xs leading-relaxed text-muted">
-        Cette règle pourra être rappelée à la cliente avant l’engagement. Elle n’est pas ajoutée
-        automatiquement à la durée de chaque créneau dans cette démo.
+        La pause est rappelée à la cliente ; elle n’allonge pas toute seule le créneau affiché.
       </p>
     </div>
 

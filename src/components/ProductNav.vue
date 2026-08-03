@@ -16,13 +16,21 @@ const { isActive: scheduleActive } = storeToRefs(scheduleStore)
 const { isInjected, hasFirmProposal, isCommitted, isReady, isSettled, isCompleted } =
   storeToRefs(opportunity)
 
+const onSettlement = computed(() => String(route.name || '').startsWith('settlement'))
+const onExecution = computed(() => String(route.name || '').startsWith('execution'))
+const onOpportunityOrEngagement = computed(
+  () =>
+    String(route.name || '').startsWith('opportunity') ||
+    String(route.name || '').startsWith('engagement'),
+)
+
 function goTransactionFollowUp() {
   opportunity.ensureInesInjected()
   if (opportunity.state.dayJAdvanced) {
     if (isSettled.value) router.push({ name: 'settlement-relation' })
     else if (isCompleted.value) router.push({ name: 'settlement' })
     else if (opportunity.isInProgress) router.push({ name: 'execution-progress' })
-    else router.push({ name: 'execution-dossier' })
+    else router.push({ name: 'execution-jour' })
   } else if (isReady.value) {
     router.push({ name: 'engagement-prep' })
   } else if (isCommitted.value) {
@@ -42,26 +50,21 @@ const items = computed(() => [
     action: () => router.push({ name: 'dashboard' }),
   },
   {
-    id: 'opportunites',
-    label: 'Opportunités',
-    active:
-      String(route.name || '').startsWith('opportunity') ||
-      String(route.name || '').startsWith('engagement') ||
-      String(route.name || '').startsWith('settlement'),
-    action: scheduleActive.value ? goTransactionFollowUp : null,
+    id: 'demandes',
+    label: 'Demandes',
+    active: onOpportunityOrEngagement.value && !onSettlement.value && !onExecution.value,
+    action: scheduleActive.value && !onSettlement.value ? goTransactionFollowUp : null,
   },
   {
     id: 'rdv',
-    label: 'Rendez-vous',
-    active:
-      String(route.name || '').startsWith('execution') ||
-      String(route.name || '').startsWith('settlement'),
+    label: onSettlement.value ? 'Paiement' : 'Rendez-vous',
+    active: onExecution.value || onSettlement.value,
     action: opportunity.state.dayJAdvanced
       ? () => {
           if (isSettled.value) router.push({ name: 'settlement-relation' })
           else if (isCompleted.value) router.push({ name: 'settlement' })
           else if (opportunity.isInProgress) router.push({ name: 'execution-progress' })
-          else router.push({ name: 'execution-dossier' })
+          else router.push({ name: 'execution-jour' })
         }
       : null,
   },
@@ -77,7 +80,7 @@ const items = computed(() => [
       else router.push({ name: 'dashboard' })
     },
   },
-  { id: 'profil', label: 'Profil', active: false, action: null },
+  { id: 'profil', label: 'Profil · bientôt', active: false, action: null },
 ])
 </script>
 
@@ -95,7 +98,7 @@ const items = computed(() => [
           <span class="relative">
             {{ item.label }}
             <span
-              v-if="item.id === 'opportunites' && isInjected && !hasFirmProposal && scheduleActive"
+              v-if="item.id === 'demandes' && isInjected && !hasFirmProposal && scheduleActive"
               class="absolute -right-1.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-secondary"
             />
           </span>

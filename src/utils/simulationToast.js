@@ -1,15 +1,18 @@
 import { useToast } from 'vue-toastification'
 import { TOAST_MIN_MS } from './toast'
 
-const PREFIX = 'Simulation :'
+const PREFIX = 'Simulation : Inès (la cliente)'
 
 /**
- * Toast discret pour signaler une réaction simulée d’Inès (cliente).
+ * Toast discret pour signaler une réaction simulée d’Inès (la cliente).
  * Ne pas utiliser pour les actions de Sarah.
  */
 export function notifySimulation(message) {
-  const text = String(message || '').trim()
+  let text = String(message || '').trim()
   if (!text) return
+
+  // Évite « Inès Inès… » si le message commence déjà par le prénom.
+  text = text.replace(/^Inès\s+/i, '')
 
   const content = text.startsWith(PREFIX) ? text : `${PREFIX} ${text}`
 

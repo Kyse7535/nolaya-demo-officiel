@@ -136,7 +136,7 @@ function setOfferNum(id, key, event) {
         </template>
 
         <div class="mt-6 rounded-card border border-dashed border-outline-soft bg-surface-low p-3">
-          <p class="text-sm font-semibold text-primary">Option hors longueur</p>
+          <p class="text-sm font-semibold text-primary">En plus (ex. mèches)</p>
           <p class="mt-1 text-xs text-muted">
             Fourniture ou service en plus du prix de la longueur choisie (ex. mèches). Ce n’est pas
             un écart de longueur.

@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
-import { ENGAGEMENT_SEQUENCE } from '../../domain/model'
 import { useOpportunityStore } from '../../stores/opportunity'
 import { useFrameworkStore } from '../../stores/framework'
 
@@ -15,6 +14,7 @@ const {
   rail,
   state,
   isCommitted,
+  engagementSequence,
   engagementSequenceRunning,
   engagementSequenceDone,
   balancePreview,
@@ -26,8 +26,8 @@ const sheet = ref(null) // 'consent' | 'payment' | 'offer' | null
 const securedRows = computed(() => [
   {
     id: 'version',
-    label: 'Version acceptée',
-    value: 'Proposition V1',
+    label: 'Proposition acceptée',
+    value: `${rail.value.prestationLabel} · ${rail.value.priceTotal} €`,
     action: 'offer',
     actionLabel: 'Voir l’offre',
   },
@@ -38,14 +38,14 @@ const securedRows = computed(() => [
   },
   {
     id: 'deposit',
-    label: 'Versement reçu',
+    label: 'Acompte reçu',
     value: `${rail.value.deposit} €`,
     action: 'payment',
-    actionLabel: 'Voir la preuve de paiement',
+    actionLabel: 'Voir le détail du paiement',
   },
   {
     id: 'balance',
-    label: 'Solde prévisionnel',
+    label: 'Reste à payer',
     value: `${balancePreview.value} €`,
   },
   {
@@ -55,10 +55,10 @@ const securedRows = computed(() => [
   },
   {
     id: 'consent',
-    label: 'Consentement',
+    label: 'Règles acceptées',
     value: 'Enregistré',
     action: 'consent',
-    actionLabel: 'Voir le consentement',
+    actionLabel: 'Voir l’accord',
   },
 ])
 
@@ -79,24 +79,24 @@ function goPrep() {
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Engagement"
-      badge="Acte C"
+      title="Rendez-vous confirmé"
+      badge="Confirmé"
       back-label="Proposition"
       @back="router.push({ name: 'opportunity-sent' })"
     />
 
     <div class="flex-1 px-5 py-5 pb-28">
-      <!-- Séquence simulateur (C2) -->
+      <!-- Séquence Inès (simulée) -->
       <section v-if="!engagementSequenceDone || engagementSequenceRunning">
-        <p class="badge-mono">Simulateur · Inès</p>
+        <p class="badge-mono">Inès (simulée)</p>
         <h2 class="mt-2 screen-title">Inès répond à votre proposition</h2>
         <p class="screen-lead">
-          Séquence déterministe — vous constatez, vous ne validez pas à sa place.
+          Inès (cliente simulée) répond. Vous regardez seulement — vous n’acceptez pas à sa place.
         </p>
 
         <ol class="mt-6 space-y-3">
           <li
-            v-for="(step, index) in ENGAGEMENT_SEQUENCE"
+            v-for="(step, index) in engagementSequence"
             :key="step.id"
             class="rounded-card border px-4 py-3 transition"
             :class="
@@ -125,12 +125,12 @@ function goPrep() {
         </ol>
       </section>
 
-      <!-- Récap COMMITTED + preuves (C1) -->
+      <!-- Récap confirmé + preuves (C1) -->
       <section v-else>
-        <p class="badge-mono">État · COMMITTED</p>
+        <p class="badge-mono">Rendez-vous confirmé</p>
         <h2 class="mt-2 screen-title">Rendez-vous confirmé avec {{ rail.clientName }}</h2>
         <p class="screen-lead">
-          Les preuves sont conservées. Ouvrez-les pour constater l’engagement formé.
+          Le rendez-vous est confirmé. Vous pouvez revoir ce qu’Inès a accepté.
         </p>
 
         <dl class="mt-5 space-y-2">
@@ -159,7 +159,7 @@ function goPrep() {
         </dl>
 
         <p class="mt-4 text-center text-[11px] text-muted">
-          Checklists de préparation créées · READINESS_PENDING
+          Prochaine étape : préparer le rendez-vous
         </p>
       </section>
     </div>
@@ -177,7 +177,7 @@ function goPrep() {
       @click.self="sheet = null"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Preuve · Consentement</p>
+        <p class="badge-mono">Détail · Accord</p>
         <h2 class="mt-2 text-base font-bold text-primary">Règles acceptées par Inès</h2>
         <ul class="mt-4 space-y-2 text-sm text-primary">
           <li>Tolérance de retard : {{ framework.lateTolerance }} min</li>
@@ -199,19 +199,19 @@ function goPrep() {
       @click.self="sheet = null"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Preuve · Paiement</p>
-        <h2 class="mt-2 text-base font-bold text-primary">Versement initial</h2>
+        <p class="badge-mono">Détail · Paiement</p>
+        <h2 class="mt-2 text-base font-bold text-primary">Acompte reçu</h2>
         <dl class="mt-4 space-y-2 text-sm">
           <div class="flex justify-between gap-3">
             <dt class="text-muted">Montant</dt>
             <dd class="font-semibold text-primary">{{ rail.deposit }} €</dd>
           </div>
           <div class="flex justify-between gap-3">
-            <dt class="text-muted">Imputé sur</dt>
-            <dd class="font-medium text-primary">Total {{ rail.priceTotal }} €</dd>
+            <dt class="text-muted">Déduit du total</dt>
+            <dd class="font-medium text-primary">{{ rail.priceTotal }} €</dd>
           </div>
           <div class="flex justify-between gap-3">
-            <dt class="text-muted">Solde prévisionnel</dt>
+            <dt class="text-muted">Reste à payer</dt>
             <dd class="font-medium text-primary">{{ balancePreview }} €</dd>
           </div>
           <div class="flex justify-between gap-3">
@@ -224,19 +224,19 @@ function goPrep() {
       </div>
     </div>
 
-    <!-- Sheet offre V1 -->
+    <!-- Sheet offre acceptée -->
     <div
       v-if="sheet === 'offer'"
       class="fixed inset-0 z-50 flex items-end bg-primary/40"
       @click.self="sheet = null"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Proposition V1 · Lecture seule</p>
-        <h2 class="mt-2 text-base font-bold text-primary">Offre acceptée</h2>
+        <p class="badge-mono">Proposition acceptée · Lecture seule</p>
+        <h2 class="mt-2 text-base font-bold text-primary">Proposition acceptée</h2>
         <ul class="mt-4 space-y-2 text-sm text-primary">
-          <li>{{ rail.prestationLabel }} · {{ rail.lengthLabel }} · tension légère</li>
+          <li>{{ rail.prestationLabel }} · {{ rail.lengthLabel }}</li>
           <li>Total {{ rail.priceTotal }} € (dont mèches {{ rail.mechesAmount }} €)</li>
-          <li>Versement initial {{ rail.deposit }} €</li>
+          <li>Acompte {{ rail.deposit }} €</li>
           <li>{{ rail.dateLabel }} à {{ rail.timeLabel }} · salon {{ rail.place }}</li>
           <li>Durée {{ rail.durationLabel }}</li>
         </ul>

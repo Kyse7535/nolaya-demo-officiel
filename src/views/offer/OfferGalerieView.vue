@@ -51,7 +51,7 @@ const { offer, label, lengthsSummary } = storeToRefs(store)
       </div>
 
       <p class="mt-4 text-xs leading-relaxed text-muted">
-        Minimum : 1 image. Cible démo : 3 réalisations.
+        Ajoutez au moins 1 photo ; 3 donnent une belle vitrine.
         {{ offer.galleryIds.length }} sélectionnée(s). Ne mélangez pas vanilles, perruques ou
         d’autres prestations dans cette galerie.
       </p>

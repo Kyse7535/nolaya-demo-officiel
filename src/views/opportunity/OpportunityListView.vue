@@ -18,6 +18,7 @@ const {
   isCommitted,
   isReady,
   cardSummary,
+  matchCriteria,
   rail,
   state,
 } = storeToRefs(opportunity)
@@ -29,7 +30,25 @@ onMounted(() => {
 })
 
 function examine() {
-  router.push({ name: 'opportunity-dossier' })
+  router.push({ name: 'opportunity-demande' })
+}
+
+function followUpStatusLabel() {
+  if (opportunity.isSettled) return 'Payé — avis & suite'
+  if (opportunity.isCompleted) return 'Terminé — règlement'
+  if (opportunity.isInProgress) return 'En cours'
+  if (state.value.dayJAdvanced) return 'Jour du rendez-vous'
+  if (isReady.value) return 'Prêt'
+  if (isCommitted.value) return 'Confirmé'
+  return 'Proposition envoyée'
+}
+
+function followUpDetailLabel() {
+  if (opportunity.isSettled) return 'Payé'
+  if (opportunity.isCompleted) return 'Terminé'
+  if (opportunity.isInProgress) return 'En cours'
+  if (isReady.value) return 'Prêt'
+  return 'Confirmé'
 }
 
 function openFollowUp() {
@@ -37,7 +56,7 @@ function openFollowUp() {
     if (opportunity.isSettled) router.push({ name: 'settlement-relation' })
     else if (opportunity.isCompleted) router.push({ name: 'settlement' })
     else if (opportunity.isInProgress) router.push({ name: 'execution-progress' })
-    else router.push({ name: 'execution-dossier' })
+    else router.push({ name: 'execution-jour' })
   } else if (isReady.value) {
     router.push({ name: 'engagement-prep' })
   } else if (isCommitted.value) {
@@ -51,15 +70,15 @@ function openFollowUp() {
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Opportunités"
-      badge="Scène 2"
+      title="Demandes"
+      badge="Demande"
       @back="router.push({ name: 'schedule-succes' })"
     />
 
     <div class="flex-1 px-5 py-5 pb-28">
-      <h2 class="screen-title">Nouvelle opportunité</h2>
+      <h2 class="screen-title">Nouvelle demande</h2>
       <p class="screen-lead">
-        Une demande compatible avec votre offre et votre planning vient d’arriver.
+        Une cliente correspond à votre offre et à un créneau libre.
       </p>
 
       <div
@@ -68,10 +87,10 @@ function openFollowUp() {
       >
         <p class="text-sm font-semibold text-primary">Aucune invitation active</p>
         <p class="mt-1 text-sm text-muted">
-          La demande d’Inès a été refusée. Vous pouvez la reprendre depuis le protocole démo.
+          La demande d’Inès a été refusée. Vous pouvez reprendre la demande d’Inès pour continuer.
         </p>
         <button type="button" class="btn-primary mt-4" @click="opportunity.recoverInes()">
-          Reprendre le dossier Inès
+          Reprendre la demande d’Inès
         </button>
       </div>
 
@@ -80,31 +99,15 @@ function openFollowUp() {
         class="mt-5 rounded-card border border-secondary/40 bg-secondary-container/30 px-3 py-3"
       >
         <p class="text-sm font-semibold text-on-secondary-container">
-          <template v-if="opportunity.isSettled">SETTLED — relation</template>
-          <template v-else-if="opportunity.isCompleted">COMPLETED — règlement</template>
-          <template v-else-if="opportunity.isInProgress">Réalisation en cours</template>
-          <template v-else-if="state.dayJAdvanced">Jour J — Acte D</template>
-          <template v-else-if="isReady">Préparation complète</template>
-          <template v-else-if="isCommitted">Engagement formé</template>
-          <template v-else>Proposition envoyée</template>
+          {{ followUpStatusLabel() }}
         </p>
         <p class="mt-1 text-sm text-muted">
           <template v-if="isCommitted">
             {{ rail.clientName }} · {{ rail.dateLabel }} {{ rail.timeLabel }} ·
-            {{
-              opportunity.isSettled
-                ? 'SETTLED'
-                : opportunity.isCompleted
-                  ? 'COMPLETED'
-                  : opportunity.isInProgress
-                    ? 'IN_PROGRESS'
-                    : isReady
-                      ? 'READY'
-                      : 'COMMITTED'
-            }}
+            {{ followUpDetailLabel() }}
           </template>
           <template v-else>
-            Offre ferme pour {{ rail.clientName }} — créneau en réserve temporaire.
+            Proposition pour {{ rail.clientName }} — créneau réservé temporairement.
           </template>
         </p>
         <button type="button" class="btn-primary mt-4" @click="openFollowUp">
@@ -116,7 +119,7 @@ function openFollowUp() {
         v-else-if="isInjected && invitationActive"
         class="mt-5 rounded-card border border-outline-soft bg-surface p-4"
       >
-        <p class="badge-mono">Invitation</p>
+        <p class="badge-mono">Nouvelle demande</p>
         <h3 class="mt-2 text-base font-bold text-primary">{{ cardSummary.title }}</h3>
         <p class="mt-1 text-sm text-muted">{{ cardSummary.slot }}</p>
         <p class="mt-1 text-sm text-muted">{{ cardSummary.budget }}</p>
@@ -126,7 +129,7 @@ function openFollowUp() {
           class="btn-ghost mt-4 text-left"
           @click="whyOpen = true"
         >
-          Pourquoi cette invitation ?
+          Pourquoi cette demande ?
         </button>
       </article>
 
@@ -135,7 +138,7 @@ function openFollowUp() {
         class="mt-5 rounded-card border border-outline-soft bg-surface-low px-3 py-3"
       >
         <p class="text-sm text-muted">
-          Aucune opportunité pour le moment. Activez d’abord votre planning.
+          Aucune demande pour le moment. Activez d’abord votre planning.
         </p>
       </div>
     </div>
@@ -153,11 +156,13 @@ function openFollowUp() {
       @click.self="whyOpen = false"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <h2 class="text-base font-bold text-primary">Pourquoi cette invitation ?</h2>
-        <p class="mt-3 text-sm leading-relaxed text-muted">
-          Cette démo vous montre comment les demandes de prestation des clientes se
-          présenteront, et comment vous les traiterez sur la plateforme.
-        </p>
+        <h2 class="text-base font-bold text-primary">Pourquoi cette demande ?</h2>
+        <ul class="mt-3 space-y-2 text-sm text-primary">
+          <li v-for="criterion in matchCriteria" :key="criterion" class="flex gap-2">
+            <span class="text-secondary">·</span>
+            <span>{{ criterion }}</span>
+          </li>
+        </ul>
         <button type="button" class="btn-primary mt-5" @click="whyOpen = false">Fermer</button>
       </div>
     </div>

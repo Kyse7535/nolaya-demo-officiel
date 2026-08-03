@@ -149,11 +149,8 @@ export const useDemoStore = defineStore('demo', () => {
   const hasStylistName = computed(() => userKey(stylistName.value).length > 0)
 
   /**
-   * Précurseur : Scène 1/3–3/3.
-   * Dès SCHEDULE_ACTIVE + injection Inès : bandeau transactionnel Scène 2/5…
-   * Après FIRM_PROPOSAL : Scène 3/5 (Acte C).
-   * Après compression jour J : Scène 4/5 (Acte D).
-   * Après COMPLETED (entrée Acte E) : Scène 5/5 — conservé jusqu’à SETTLED / clôture.
+   * Étapes grand public (1–8) pour le bandeau — sans « Scène / Acte ».
+   * 1–3 création offre ; 4–8 parcours Inès simulée.
    */
   const sceneMeta = computed(() => {
     const opportunity = useOpportunityStore()
@@ -164,36 +161,45 @@ export const useDemoStore = defineStore('demo', () => {
     if (opportunity.isCompleted || opportunity.isSettled) {
       return {
         phase: 'transaction',
-        scene: 5,
-        of: 5,
-        label: 'Inès est une cliente simulée · Scène 5/5',
+        scene: 8,
+        of: 8,
+        label: 'Inès est une cliente simulée · Étape 8 sur 8',
       }
     }
 
     if (opportunity.state.dayJAdvanced) {
       return {
         phase: 'transaction',
-        scene: 4,
-        of: 5,
-        label: 'Inès est une cliente simulée · Scène 4/5',
+        scene: 7,
+        of: 8,
+        label: 'Inès est une cliente simulée · Étape 7 sur 8',
       }
     }
 
-    if (opportunity.hasFirmProposal || opportunity.isCommitted) {
+    if (opportunity.isCommitted || opportunity.isReady) {
       return {
         phase: 'transaction',
-        scene: 3,
-        of: 5,
-        label: 'Inès est une cliente simulée · Scène 3/5',
+        scene: 6,
+        of: 8,
+        label: 'Inès est une cliente simulée · Étape 6 sur 8',
+      }
+    }
+
+    if (opportunity.hasFirmProposal) {
+      return {
+        phase: 'transaction',
+        scene: 5,
+        of: 8,
+        label: 'Inès est une cliente simulée · Étape 5 sur 8',
       }
     }
 
     if (schedule.isActive && opportunity.isInjected) {
       return {
         phase: 'transaction',
-        scene: 2,
-        of: 5,
-        label: 'Inès est une cliente simulée · Scène 2/5',
+        scene: 4,
+        of: 8,
+        label: 'Inès est une cliente simulée · Étape 4 sur 8',
       }
     }
 
@@ -201,23 +207,23 @@ export const useDemoStore = defineStore('demo', () => {
       return {
         phase: 'precursor',
         scene: 1,
-        of: 3,
-        label: 'Création de l’offre · Scène 1/3',
+        of: 8,
+        label: 'Créez votre offre · Étape 1 sur 8',
       }
     }
     if (offer.status !== OfferStatus.ACTIVE) {
       return {
         phase: 'precursor',
         scene: 2,
-        of: 3,
-        label: 'Création de l’offre · Scène 2/3',
+        of: 8,
+        label: 'Créez votre offre · Étape 2 sur 8',
       }
     }
     return {
       phase: 'precursor',
       scene: 3,
-      of: 3,
-      label: 'Création de l’offre · Scène 3/3',
+      of: 8,
+      label: 'Créez votre offre · Étape 3 sur 8',
     }
   })
 

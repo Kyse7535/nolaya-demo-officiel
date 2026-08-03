@@ -31,7 +31,6 @@ watch(
 )
 
 const sheet = ref(null)
-const selected = ref(null)
 
 watch(
   () => ({
@@ -42,7 +41,7 @@ watch(
   }),
   ({ v2, resumed, completed, status }) => {
     if (status === 'NONE') {
-      router.replace({ name: 'execution-dossier' })
+      router.replace({ name: 'execution-jour' })
       return
     }
     if (!completed && (!v2 || !resumed)) {
@@ -54,56 +53,34 @@ watch(
 
 const summaryRows = computed(() => [
   { label: 'Prestation initiale', value: `${rail.value.prestationLabel} · réalisée` },
-  { label: 'Modification', value: `${rail.value.pearlsLabel} (V2)` },
-  { label: 'Interruptions', value: 'Aucune' },
+  { label: 'Modification', value: `${rail.value.pearlsLabel}` },
   { label: 'Incidents', value: 'Aucun' },
   { label: 'Durée réelle', value: rail.value.durationLabelV2 },
   { label: 'Prix final', value: `${rail.value.priceTotalV2} €` },
   { label: 'Acompte', value: `${rail.value.deposit} €` },
-  { label: 'Solde à régler', value: `${balancePreview.value} €` },
+  { label: 'Reste à payer', value: `${balancePreview.value} €` },
 ])
 
-const offRailMessage = computed(() => {
-  if (state.value.completionChoiceId === 'partial') {
-    return 'Clôture partielle enregistrée localement — hors cadre de la démo.'
-  }
-  if (state.value.completionChoiceId === 'resolution') {
-    return 'Entrée protocole incident — hors cadre de la démo.'
-  }
-  return ''
-})
-
-function choose(id) {
-  selected.value = id
-  if (id === 'full') {
-    opportunity.qualifyCompletion('full')
-    return
-  }
-  opportunity.qualifyCompletion(id)
-}
-
-function recover() {
-  opportunity.recoverFullCompletion()
-  selected.value = 'full'
+function chooseFull() {
+  if (!canQualifyCompletion.value && !isCompleted.value) return
+  opportunity.qualifyCompletion('full')
 }
 </script>
 
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Clôture"
-      :badge="isCompleted ? 'COMPLETED' : 'Acte D'"
+      title="Fin de prestation"
+      :badge="isCompleted ? 'Terminé' : 'Fin'"
       back-label="En cours"
       @back="router.push({ name: 'execution-progress' })"
     />
 
     <div class="flex-1 px-5 py-5 pb-28">
       <template v-if="!isCompleted">
-        <p class="badge-mono">Qualification de fin</p>
-        <h2 class="mt-2 screen-title">Terminer la prestation</h2>
+        <h2 class="screen-title">Terminer la prestation</h2>
         <p class="screen-lead">
-          Choisissez explicitement comment clôturer. Le scénario de démonstration est la
-          réalisation intégrale.
+          Confirmez que la prestation est réalisée comme convenu.
         </p>
 
         <dl class="mt-5 space-y-2">
@@ -118,43 +95,20 @@ function recover() {
         </dl>
 
         <button type="button" class="btn-ghost mt-3 text-xs" @click="sheet = 'proofs'">
-          Revoir les preuves V2
+          Revoir la modification acceptée
         </button>
 
-        <fieldset class="mt-6">
-          <legend class="field-label">Qualification</legend>
-          <ul class="space-y-2">
-            <li v-for="opt in COMPLETION_OPTIONS" :key="opt.id">
-              <button
-                type="button"
-                class="choice w-full"
-                :class="{ 'choice-active': selected === opt.id || state.completionChoiceId === opt.id }"
-                @click="choose(opt.id)"
-              >
-                <span class="block text-sm font-medium text-primary">{{ opt.label }}</span>
-                <span class="mt-0.5 block text-xs text-muted">{{ opt.detail }}</span>
-              </button>
-            </li>
-          </ul>
-        </fieldset>
-
-        <section
-          v-if="offRailMessage && !isCompleted"
-          class="mt-5 rounded-card border border-outline-soft bg-surface-low px-4 py-4"
-        >
-          <p class="text-sm text-primary">{{ offRailMessage }}</p>
-          <button type="button" class="btn-primary mt-4" @click="recover">
-            Clôturer intégralement pour la démo
-          </button>
-        </section>
+        <button type="button" class="btn-primary mt-6" @click="chooseFull()">
+          {{ COMPLETION_OPTIONS[0]?.label || 'Terminer — prestation réalisée' }}
+        </button>
       </template>
 
       <template v-else>
-        <p class="badge-mono">État · COMPLETED</p>
-        <h2 class="mt-2 screen-title">Prestation clôturée</h2>
+        <p class="badge-mono">Terminé</p>
+        <h2 class="mt-2 screen-title">Prestation terminée</h2>
         <p class="screen-lead">
-          {{ rail.clientName }} · {{ rail.priceTotalV2 }} € · {{ rail.durationLabelV2 }}. Les
-          preuves de modification restent consultables.
+          {{ rail.clientName }} · {{ rail.priceTotalV2 }} € · {{ rail.durationLabelV2 }}. La
+          modification acceptée reste consultable.
         </p>
 
         <dl class="mt-5 space-y-2">
@@ -171,14 +125,14 @@ function recover() {
         </dl>
 
         <button type="button" class="btn-ghost mt-4 text-xs" @click="sheet = 'proofs'">
-          Voir les preuves V1 / V2
+          Voir la modification acceptée
         </button>
 
         <section class="mt-7 rounded-card border border-secondary/40 bg-secondary-container/25 px-4 py-4">
-          <p class="badge-mono">Acte E · Scène 5/5</p>
+          <p class="badge-mono">Ensuite</p>
           <h3 class="mt-2 text-sm font-semibold text-primary">Règlement & relation</h3>
           <p class="mt-1 text-sm text-muted">
-            Solde {{ balancePreview }} € à constater · preuves & revenu net · avis Inès · favori.
+            Ensuite : Inès paie le reste, vous voyez votre revenu, puis son avis.
           </p>
           <button
             type="button"
@@ -194,8 +148,8 @@ function recover() {
           >
             {{
               demo.isFeedbackSubmitted('D')
-                ? 'Revoir mon retour (acte D)'
-                : 'Donner mon retour sur cet acte'
+                ? 'Revoir mon avis sur cette étape'
+                : 'Donner mon avis sur cette étape'
             }}
           </button>
         </section>
@@ -214,8 +168,8 @@ function recover() {
       @click.self="sheet = null"
     >
       <div class="mx-auto max-h-[85vh] w-full max-w-phone overflow-y-auto rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Preuves · Modification</p>
-        <h2 class="mt-2 text-base font-bold text-primary">Protection temps / revenu</h2>
+        <p class="badge-mono">Modification acceptée</p>
+        <h2 class="mt-2 text-base font-bold text-primary">Rappel de la modification acceptée</h2>
         <ul class="mt-4 space-y-3 text-sm text-primary">
           <li>
             <span class="font-semibold">Demande</span> — {{ rail.pearlsLabel }}
@@ -225,15 +179,15 @@ function recover() {
             +{{ rail.modificationMinutes }} min
           </li>
           <li>
-            <span class="font-semibold">Consentement</span> —
+            <span class="font-semibold">Acceptée</span> —
             {{ state.modificationAcceptedAtLabel || rail.modificationAcceptedAt }}
           </li>
           <li>
-            <span class="font-semibold">V1 archivée</span> — {{ rail.priceTotal }} € ·
+            <span class="font-semibold">Avant</span> — {{ rail.priceTotal }} € ·
             {{ rail.durationLabel }}
           </li>
           <li>
-            <span class="font-semibold">V2 active</span> — {{ rail.priceTotalV2 }} € ·
+            <span class="font-semibold">Après</span> — {{ rail.priceTotalV2 }} € ·
             {{ rail.durationLabelV2 }}
           </li>
         </ul>

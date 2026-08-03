@@ -45,7 +45,7 @@ function continueToDemand() {
   <div class="flex flex-1 flex-col px-5 pb-6 pt-8">
     <p class="badge-mono">Planning actif</p>
     <h1 class="mt-3 text-2xl font-bold tracking-tight text-primary">
-      Vous pouvez maintenant recevoir des demandes compatibles
+      Vous pouvez maintenant recevoir des demandes
     </h1>
 
     <div class="mt-6 rounded-card border border-outline-soft bg-surface p-4">
@@ -55,10 +55,7 @@ function continueToDemand() {
         {{ placeLine }} · à partir de {{ devisPreview.from }} €
       </p>
       <p class="mt-2 text-sm text-muted">
-        Créneaux possibles incluent {{ schedule.consequenceLabel }}
-      </p>
-      <p class="mt-3 text-xs font-mono uppercase tracking-wide text-secondary">
-        État · SCHEDULE_ACTIVE
+        Grâce à vos horaires, {{ schedule.consequenceLabel }} peut recevoir une demande.
       </p>
     </div>
 
@@ -67,29 +64,34 @@ function continueToDemand() {
       class="mt-4 rounded-card border border-secondary/40 bg-secondary-container/30 px-3 py-3"
     >
       <p class="text-sm font-semibold text-on-secondary-container">
-        {{ hasFirmProposal ? 'Proposition déjà envoyée' : 'Demande Inès injectée' }}
+        {{
+          hasFirmProposal
+            ? 'Proposition déjà envoyée'
+            : 'Une demande d’Inès (cliente simulée) vous attend'
+        }}
       </p>
       <p class="mt-1 text-sm text-muted">
         {{
           hasFirmProposal
-            ? 'Poursuivez vers le suivi de l’offre ferme.'
-            : 'Une opportunité compatible attend votre examen (Scène 2/5).'
+            ? 'Poursuivez vers le suivi de votre proposition.'
+            : 'Elle correspond à votre offre et à un créneau libre.'
         }}
       </p>
     </div>
 
     <div class="mt-auto space-y-2 pt-8">
       <button type="button" class="btn-primary" @click="continueToDemand">
-        Continuer vers une demande cliente
+        {{ hasFirmProposal ? 'Voir le suivi' : 'Voir la demande' }}
       </button>
       <button type="button" class="btn-secondary" @click="router.push({ name: 'schedule-liste' })">
         Voir mon planning
       </button>
-      <p class="text-center text-[11px] text-muted">
-        Enchaînement Acte B — sans reset du cadre, de l’offre ni du planning
-      </p>
       <button type="button" class="btn-ghost mx-auto block" @click="demo.openResearch('P')">
-        {{ demo.isFeedbackSubmitted('P') ? 'Revoir mon retour (acte précurseur)' : 'Donner mon retour sur cet acte' }}
+        {{
+          demo.isFeedbackSubmitted('P')
+            ? 'Revoir mon avis sur cette étape'
+            : 'Donner mon avis sur cette étape'
+        }}
       </button>
     </div>
   </div>

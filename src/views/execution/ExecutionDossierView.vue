@@ -8,7 +8,7 @@ import { useOpportunityStore } from '../../stores/opportunity'
 
 const router = useRouter()
 const opportunity = useOpportunityStore()
-const { rail, state, isReady, isInProgress, isCompleted, isSettled, isV2 } =
+const { rail, isReady, isInProgress, isCompleted, isSettled, isV2 } =
   storeToRefs(opportunity)
 
 const sheet = ref(null)
@@ -24,17 +24,17 @@ const rows = computed(() => [
   { label: 'Prix convenu', value: `${rail.value.priceTotal} €` },
   {
     label: 'Engagement',
-    value: isV2.value ? 'V2 active' : 'V1 active',
+    value: isV2.value ? 'Modifiée (perles)' : 'Proposition acceptée',
     action: 'v1',
-    actionLabel: 'Voir l’engagement V1',
+    actionLabel: 'Voir la proposition acceptée',
   },
   {
     label: 'Consignes sensibles',
-    value: `${rail.value.scalp} · tension légère`,
+    value: rail.value.scalp,
   },
   {
     label: 'Préparation',
-    value: isReady.value ? 'Complète (READY)' : 'En cours',
+    value: isReady.value ? 'Complète' : 'En cours',
   },
 ])
 
@@ -60,8 +60,8 @@ function start() {
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Dossier du jour"
-      badge="Acte D"
+      title="Demande du jour"
+      badge="Jour J"
       back-label="Préparation"
       @back="router.push({ name: 'engagement-prep' })"
     />
@@ -70,8 +70,7 @@ function start() {
       <p class="badge-mono">Jour J · {{ rail.dateLabel }}</p>
       <h2 class="mt-2 screen-title">Rendez-vous avec {{ rail.clientName }}</h2>
       <p class="screen-lead">
-        Préparation complète. Démarrez pour ouvrir le dossier opérationnel — aucune modification
-        n’est encore demandée.
+        Tout est prêt. Commencez la prestation quand Inès est installée.
       </p>
 
       <dl class="mt-6 space-y-2">
@@ -99,10 +98,6 @@ function start() {
         </div>
       </dl>
 
-      <button type="button" class="btn-secondary mt-5" disabled>
-        Signaler un problème — hors parcours
-      </button>
-      <p class="mt-1 text-center text-[11px] text-muted">Non disponible dans cette démo</p>
     </div>
 
     <StickyFooter
@@ -124,7 +119,7 @@ function start() {
       @click.self="sheet = null"
     >
       <div class="mx-auto w-full max-w-phone rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Engagement · V1</p>
+        <p class="badge-mono">Proposition acceptée</p>
         <h2 class="mt-2 text-base font-bold text-primary">Proposition acceptée</h2>
         <ul class="mt-4 space-y-2 text-sm text-primary">
           <li>{{ rail.prestationLabel }} · {{ rail.lengthLabel }}</li>
@@ -133,7 +128,9 @@ function start() {
           <li>Créneau : {{ rail.dateLabel }}, {{ rail.timeLabel }}</li>
           <li>Acompte reçu : {{ rail.deposit }} €</li>
         </ul>
-        <p class="mt-4 text-xs text-muted">Lecture seule · version active jusqu’à acceptation V2</p>
+        <p class="mt-4 text-xs text-muted">
+          Lecture seule · valable jusqu’à acceptation d’une modification
+        </p>
         <button type="button" class="btn-primary mt-5" @click="sheet = null">Fermer</button>
       </div>
     </div>

@@ -22,7 +22,7 @@ const galleryItems = computed(() =>
 const pillars = [
   { title: 'Lieu', body: 'Où vous accueillez, d’après votre cadre.' },
   { title: 'Jours & horaires', body: 'Vos jours ouverts, avec les horaires de chaque jour.' },
-  { title: 'Limite de charge', body: 'Combien de rendez-vous maximum par jour.' },
+  { title: 'Rendez-vous max. / jour', body: 'Combien de rendez-vous maximum par jour.' },
 ]
 
 function openSchedule() {
@@ -36,7 +36,7 @@ function openSchedule() {
     <p class="badge-mono">Offre active</p>
     <h1 class="mt-3 screen-title">Votre prestation est active</h1>
     <p class="screen-lead">
-      Voici comment elle apparaît côté cliente. Ensuite, définissez quand vous êtes disponible.
+      Voici comment elle apparaît côté cliente. Ensuite : vos dispos pour recevoir des demandes.
     </p>
 
     <p class="field-label mt-5">Vue cliente</p>
@@ -92,7 +92,8 @@ function openSchedule() {
 
     <h2 class="mt-6 text-lg font-bold text-primary">Quand vous êtes disponible</h2>
     <p class="mt-2 text-sm leading-relaxed text-muted">
-      Indiquez vos jours, vos horaires et votre charge. Les créneaux possibles en découlent.
+      Indiquez vos jours, vos horaires et le nombre max. de rendez-vous. Les créneaux possibles en
+      découlent.
     </p>
 
     <ul class="mt-4 space-y-2">

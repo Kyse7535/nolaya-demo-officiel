@@ -46,7 +46,7 @@ const { framework } = storeToRefs(store)
         :class="{ 'choice-active': framework.addressPrivate }"
         @click="store.patch({ addressPrivate: true })"
       >
-        Adresse masquée jusqu’à l’engagement
+        Adresse masquée jusqu’à confirmation du rendez-vous
       </button>
       <button
         type="button"

@@ -53,13 +53,13 @@ const needsFramework = new Set([
   'schedule-succes',
   'schedule-liste',
   'opportunity-list',
-  'opportunity-dossier',
+  'opportunity-demande',
   'opportunity-clarification',
   'opportunity-proposal',
   'opportunity-sent',
   'engagement-committed',
   'engagement-prep',
-  'execution-dossier',
+  'execution-jour',
   'execution-progress',
   'execution-modification',
   'execution-complete',
@@ -72,13 +72,13 @@ const needsOffer = new Set([
   'schedule-config',
   'schedule-recap',
   'opportunity-list',
-  'opportunity-dossier',
+  'opportunity-demande',
   'opportunity-clarification',
   'opportunity-proposal',
   'opportunity-sent',
   'engagement-committed',
   'engagement-prep',
-  'execution-dossier',
+  'execution-jour',
   'execution-progress',
   'execution-modification',
   'execution-complete',
@@ -90,13 +90,13 @@ const needsSchedule = new Set([
   'schedule-succes',
   'schedule-liste',
   'opportunity-list',
-  'opportunity-dossier',
+  'opportunity-demande',
   'opportunity-clarification',
   'opportunity-proposal',
   'opportunity-sent',
   'engagement-committed',
   'engagement-prep',
-  'execution-dossier',
+  'execution-jour',
   'execution-progress',
   'execution-modification',
   'execution-complete',
@@ -105,13 +105,13 @@ const needsSchedule = new Set([
 ])
 
 const needsOpportunity = new Set([
-  'opportunity-dossier',
+  'opportunity-demande',
   'opportunity-clarification',
   'opportunity-proposal',
   'opportunity-sent',
   'engagement-committed',
   'engagement-prep',
-  'execution-dossier',
+  'execution-jour',
   'execution-progress',
   'execution-modification',
   'execution-complete',
@@ -143,7 +143,8 @@ const router = createRouter({
     { path: '/planning/actif', name: 'schedule-succes', component: ScheduleSuccesView },
     { path: '/planning/liste', name: 'schedule-liste', component: ScheduleListeView },
     { path: '/opportunites', name: 'opportunity-list', component: OpportunityListView },
-    { path: '/opportunites/dossier', name: 'opportunity-dossier', component: OpportunityDossierView },
+    { path: '/opportunites/demande', name: 'opportunity-demande', component: OpportunityDossierView },
+    { path: '/opportunites/dossier', redirect: { name: 'opportunity-demande' } },
     {
       path: '/opportunites/clarification',
       name: 'opportunity-clarification',
@@ -171,7 +172,7 @@ const router = createRouter({
     },
     {
       path: '/realisation',
-      name: 'execution-dossier',
+      name: 'execution-jour',
       component: ExecutionDossierView,
     },
     {
@@ -218,7 +219,7 @@ function executionHome(opportunity) {
     }
     return { name: 'execution-progress' }
   }
-  return { name: 'execution-dossier' }
+  return { name: 'execution-jour' }
 }
 
 router.beforeEach((to) => {
@@ -256,19 +257,19 @@ router.beforeEach((to) => {
     if (to.name === 'opportunity-sent' && !opportunity.hasFirmProposal) {
       return opportunity.state.canRealize || opportunity.canPrepareProposal
         ? { name: 'opportunity-proposal' }
-        : { name: 'opportunity-dossier' }
+        : { name: 'opportunity-demande' }
     }
 
     if (to.name === 'opportunity-proposal') {
       if (opportunity.hasFirmProposal) return { name: 'opportunity-sent' }
       if (!opportunity.canPrepareProposal && !opportunity.state.canRealize) {
-        return { name: 'opportunity-dossier' }
+        return { name: 'opportunity-demande' }
       }
     }
 
     if (to.name === 'opportunity-clarification') {
       if (opportunity.state.clarificationSent || !opportunity.invitationActive) {
-        return { name: 'opportunity-dossier' }
+        return { name: 'opportunity-demande' }
       }
     }
 
@@ -283,7 +284,7 @@ router.beforeEach((to) => {
     }
 
     const executionRoutes = new Set([
-      'execution-dossier',
+      'execution-jour',
       'execution-progress',
       'execution-modification',
       'execution-complete',
@@ -307,13 +308,13 @@ router.beforeEach((to) => {
       }
 
       if (to.name === 'execution-progress' && !opportunity.isInProgress && !opportunity.isCompleted) {
-        return { name: 'execution-dossier' }
+        return { name: 'execution-jour' }
       }
 
       if (to.name === 'execution-modification') {
         if (opportunity.isSettled) return { name: 'settlement-relation' }
         if (opportunity.isCompleted) return { name: 'settlement' }
-        if (!opportunity.isInProgress) return { name: 'execution-dossier' }
+        if (!opportunity.isInProgress) return { name: 'execution-jour' }
         if (opportunity.state.modificationRefused || !opportunity.state.pearlsEventHandled) {
           return { name: 'execution-progress' }
         }

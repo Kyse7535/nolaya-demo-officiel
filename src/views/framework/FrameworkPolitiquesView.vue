@@ -20,8 +20,8 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Politiques, sécurité et photos</h2>
-      <p class="screen-lead">Choisissez des règles simples, sans rédiger un texte juridique.</p>
+      <h2 class="screen-title">Retard, annulation et photos</h2>
+      <p class="screen-lead">Choisissez des règles simples.</p>
 
       <p class="field-label mt-6">Retard toléré</p>
       <div class="grid grid-cols-3 gap-2">
@@ -50,20 +50,16 @@ const { framework } = storeToRefs(store)
       </button>
 
       <p class="field-label mt-6">Interruption pour sécurité</p>
-      <div class="choice choice-active choice-locked w-full">
-        Possible si tension excessive ou malaise
+      <div class="platform-rule w-full">
+        Possible si douleur forte ou malaise
+        <span class="platform-rule__tag">Fixé par la plateforme</span>
       </div>
-      <p class="mt-1.5 text-xs text-muted">Règle par défaut de la plateforme — non modifiable ici.</p>
 
-      <p class="field-label mt-6">Consentement photos</p>
-      <button
-        type="button"
-        class="choice w-full"
-        :class="{ 'choice-active': framework.photoConsent === 'explicit' }"
-        @click="store.patch({ photoConsent: 'explicit' })"
-      >
+      <p class="field-label mt-6">Photos de la cliente</p>
+      <div class="platform-rule w-full">
         Publication uniquement avec l’accord de la cliente
-      </button>
+        <span class="platform-rule__tag">Fixé par la plateforme</span>
+      </div>
     </div>
 
     <StickyFooter label="Continuer" @action="router.push({ name: 'framework-recap' })" />

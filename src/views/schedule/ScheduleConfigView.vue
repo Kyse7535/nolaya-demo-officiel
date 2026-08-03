@@ -61,14 +61,15 @@ function num(event, key) {
     <div class="flex-1 px-5 py-5">
       <h2 class="screen-title">Configurer le planning</h2>
       <p class="screen-lead">
-        Indiquez vos jours, horaires et charge. Les créneaux possibles en découlent.
+        Indiquez vos jours, horaires et le nombre max. de rendez-vous. Les créneaux possibles en
+        découlent.
       </p>
 
       <p class="field-label mt-6">Contexte d’accueil</p>
-      <div class="choice choice-active choice-locked w-full">
+      <div class="platform-rule w-full">
         {{ contextLabel }}
+        <span class="platform-rule__tag">Comme dans votre cadre (non modifiable ici)</span>
       </div>
-      <p class="mt-1.5 text-xs text-muted">Issu de votre cadre professionnel.</p>
 
       <label class="field-label mt-6">Lieu</label>
       <input
@@ -125,14 +126,14 @@ function num(event, key) {
         </div>
       </div>
 
-      <label class="field-label mt-6">Limite de charge</label>
+      <label class="field-label mt-6">Rendez-vous max. / jour</label>
       <input
         type="number"
         class="w-full rounded-card border border-outline-soft bg-surface px-3 py-3 text-sm"
         :value="schedule.maxPerDay"
         @input="num($event, 'maxPerDay')"
       />
-      <p class="mt-1 text-xs text-muted">Rendez-vous maximum par jour</p>
+      <p class="mt-1 text-xs text-muted">Nombre maximum de rendez-vous que vous acceptez par jour</p>
 
       <p class="field-label mt-6">Aperçu — semaine du 12–18 août</p>
       <div class="space-y-2">
@@ -163,8 +164,8 @@ function num(event, key) {
         </div>
       </div>
       <p v-if="consequenceVisible" class="mt-3 text-xs leading-relaxed text-muted">
-        {{ schedule.consequenceLabel }} apparaît comme créneau possible — conséquence de vos
-        règles.
+        Grâce à vos jours, le samedi 15 août à {{ schedule.dayHours?.sam?.open || '9 h' }} peut
+        recevoir une demande.
       </p>
       <p v-else class="mt-3 text-xs leading-relaxed text-muted">
         Ajoutez le samedi pour voir le créneau du 15 août.

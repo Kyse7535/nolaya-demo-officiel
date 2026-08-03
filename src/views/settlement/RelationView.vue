@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
 import {
-  INES_MEMORIZED_PREFS,
   INES_REVIEW,
   REVIEW_REPLY_MAX,
   REVIEW_TONES,
@@ -22,6 +21,7 @@ const {
   state,
   isSettled,
   hasReviewReply,
+  memorizedPrefs,
   netRevenue,
 } = storeToRefs(opportunity)
 const { displayName } = storeToRefs(demo)
@@ -65,7 +65,7 @@ function sendReply() {
   sheet.value = null
   window.setTimeout(() => {
     sheet.value = 'favorite'
-    notifySimulation('Inès vous a ajoutée à ses favorites')
+    notifySimulation('Inès vous a ajoutée à ses coups de cœur')
   }, 280)
 }
 
@@ -104,8 +104,8 @@ watch(
   <div class="flex flex-1 flex-col">
     <ScreenHeader
       title="Avis & relation"
-      badge="Acte E"
-      back-label="Règlement"
+      badge="Avis"
+      back-label="Paiement"
       @back="router.push({ name: 'settlement' })"
     />
 
@@ -113,8 +113,7 @@ watch(
       <p class="badge-mono">Avis vérifié · {{ rail.clientName }}</p>
       <h2 class="mt-2 screen-title">Ce qu’Inès a retenu</h2>
       <p class="screen-lead">
-        Lisez l’avis, répondez avec le ton qui vous convient, puis constatez la relation qui se
-        construit.
+        Lisez l’avis, répondez, puis voyez la suite avec Inès.
       </p>
 
       <!-- Dimensions -->
@@ -143,7 +142,7 @@ watch(
         <p class="text-sm font-semibold text-on-secondary-container">Réponse envoyée</p>
         <p class="mt-1 text-sm text-primary">{{ state.reviewReplyText }}</p>
         <p class="mt-2 text-[11px] text-muted">
-          {{ state.reviewRepliedAtLabel || '—' }} · REVIEW_REPLIED
+          {{ state.reviewRepliedAtLabel || '—' }}
         </p>
       </section>
 
@@ -154,17 +153,17 @@ watch(
       >
         <p class="badge-mono">Relation</p>
         <h3 class="mt-2 text-sm font-semibold text-primary">
-          {{ rail.clientName }} vous a ajoutée à ses favorites
+          {{ rail.clientName }} vous a ajoutée à ses coups de cœur
         </h3>
         <p class="mt-1 text-sm text-muted">
           Préférences mémorisées — elle pourra reprendre cette prestation depuis son historique.
         </p>
         <div class="mt-3 flex flex-wrap gap-3">
           <button type="button" class="btn-ghost text-xs" @click="sheet = 'favorite'">
-            Revoir le constat
+            Voir le détail
           </button>
           <button type="button" class="btn-ghost text-xs" @click="openClient">
-            Voir la fiche cliente
+            Infos retenues sur Inès
           </button>
         </div>
       </section>
@@ -193,16 +192,10 @@ watch(
         >
           {{
             demo.isFeedbackSubmitted('E')
-              ? 'Revoir mon retour (acte E)'
-              : 'Donner mon retour · Terminer'
+              ? 'Revoir mon avis · Terminer'
+              : 'Donner mon avis · Terminer'
           }}
         </button>
-        <button type="button" class="btn-secondary" disabled>
-          Tester un incident — hors parcours
-        </button>
-        <p class="text-center text-[11px] text-muted">
-          Branche protocole — non disponible dans cette démo
-        </p>
       </div>
     </div>
 
@@ -215,8 +208,8 @@ watch(
       v-else
       :label="
         demo.isFeedbackSubmitted('E')
-          ? 'Revoir mon retour (acte E)'
-          : 'Donner mon retour · Terminer'
+          ? 'Revoir mon avis · Terminer'
+          : 'Donner mon avis · Terminer'
       "
       @action="finishDemo"
     />
@@ -228,7 +221,7 @@ watch(
       @click.self="sheet = null"
     >
       <div class="mx-auto max-h-[90vh] w-full max-w-phone overflow-y-auto rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Répondre · Sur rail</p>
+        <p class="badge-mono">Répondre à l’avis</p>
         <h2 class="mt-2 text-base font-bold text-primary">Choisissez un ton</h2>
         <p class="mt-1 text-sm text-muted">
           Modèle proposé, ajustable brièvement — puis envoi confirmé.
@@ -283,16 +276,16 @@ watch(
       @click.self="closeFavorite"
     >
       <div class="mx-auto max-h-[85vh] w-full max-w-phone overflow-y-auto rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Relation · Favorite</p>
+        <p class="badge-mono">Relation · Coup de cœur</p>
         <h2 class="mt-2 text-base font-bold text-primary">
-          {{ rail.clientName }} vous a ajoutée à ses favorites
+          {{ rail.clientName }} vous a ajoutée à ses coups de cœur
         </h2>
         <p class="mt-2 text-sm leading-relaxed text-muted">
-          Elle consent à mémoriser ses préférences (cuir chevelu sensible, tension légère, mi-dos +
-          mèches) et pourra reprendre cette prestation depuis son historique.
+          Elle consent à mémoriser ses préférences et pourra reprendre cette prestation depuis
+          son historique.
         </p>
         <button type="button" class="btn-secondary mt-5" @click="openClient">
-          Voir la fiche cliente
+          Infos retenues sur Inès
         </button>
         <button type="button" class="btn-primary mt-2" @click="closeFavorite">
           Continuer
@@ -300,14 +293,14 @@ watch(
       </div>
     </div>
 
-    <!-- Fiche cliente lecture -->
+    <!-- Infos retenues sur Inès -->
     <div
       v-if="sheet === 'client'"
       class="fixed inset-0 z-50 flex items-end bg-primary/40"
       @click.self="sheet = null"
     >
       <div class="mx-auto max-h-[85vh] w-full max-w-phone overflow-y-auto rounded-t-xl bg-surface p-5">
-        <p class="badge-mono">Fiche cliente · Lecture</p>
+        <p class="badge-mono">Infos retenues sur Inès</p>
         <h2 class="mt-2 text-base font-bold text-primary">{{ rail.clientName }}</h2>
         <dl class="mt-4 space-y-3 text-sm">
           <div>
@@ -324,7 +317,6 @@ watch(
             <dt class="text-xs font-semibold uppercase tracking-wide text-muted">Prestation</dt>
             <dd class="mt-1 text-primary">
               {{ rail.prestationLabel }} · {{ rail.lengthLabel }} · {{ rail.priceTotalV2 }} €
-              (net {{ netRevenue }} €)
             </dd>
           </div>
           <div>
@@ -333,13 +325,13 @@ watch(
             </dt>
             <dd class="mt-1">
               <ul class="list-inside list-disc text-primary">
-                <li v-for="pref in INES_MEMORIZED_PREFS" :key="pref">{{ pref }}</li>
+                <li v-for="pref in memorizedPrefs" :key="pref">{{ pref }}</li>
               </ul>
             </dd>
           </div>
         </dl>
         <p class="mt-4 text-xs text-muted">
-          Lecture seule — pas de configuration hors démo.
+          Lecture seule — le revenu net reste dans l’écran Paiement.
         </p>
         <button type="button" class="btn-primary mt-5" @click="sheet = null">Fermer</button>
       </div>
@@ -357,11 +349,11 @@ watch(
           Merci d’avoir testé le parcours {{ displayName }} / Inès
         </h2>
         <p class="mt-2 text-sm leading-relaxed text-muted">
-          Vous avez parcouru les 5 scènes : offre &amp; planning → opportunité → engagement →
-          réalisation → règlement &amp; relation.
+          Vous avez parcouru : offre &amp; planning → demande → confirmation → réalisation →
+          paiement &amp; relation.
         </p>
         <p class="mt-3 text-sm text-primary">
-          Règlement final <strong>{{ rail.priceTotalV2 }} €</strong> · net
+          Paiement final <strong>{{ rail.priceTotalV2 }} €</strong> · net
           <strong>{{ netRevenue }} €</strong>
           <span v-if="hasReviewReply"> · réponse à l’avis envoyée</span>.
         </p>
@@ -371,9 +363,6 @@ watch(
           @click="demo.resetAll(router)"
         >
           Recommencer le scénario
-        </button>
-        <button type="button" class="btn-secondary mt-2" disabled>
-          Tester un incident
         </button>
         <button type="button" class="btn-ghost mx-auto mt-3 block" @click="onThanksClose">
           Fermer

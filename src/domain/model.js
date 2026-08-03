@@ -71,12 +71,12 @@ export const EngagementVersion = {
   V2: 'V2',
 }
 
-/** Séquence simulateur Inès (écran 10) — déterministe, non pilotée par Sarah. */
+/** Séquence simulateur Inès (écran 10) — non pilotée par Sarah. */
 export const ENGAGEMENT_SEQUENCE = [
   {
     id: 'accept',
-    label: 'Inès accepte la proposition V1',
-    detail: 'Offre ferme reçue et acceptée telle quelle.',
+    label: 'Inès accepte votre proposition',
+    detail: 'Proposition reçue et acceptée telle quelle.',
   },
   {
     id: 'consent',
@@ -85,8 +85,8 @@ export const ENGAGEMENT_SEQUENCE = [
   },
   {
     id: 'payment',
-    label: 'Versement initial de 50 € reçu',
-    detail: 'Acompte imputé sur le total convenu.',
+    label: 'Acompte de 50 € reçu',
+    detail: 'Acompte de 50 € reçu — déduit du total.',
   },
 ]
 
@@ -96,8 +96,8 @@ export const SARAH_CHECKLIST = [
   { id: 'poste', label: 'Poste de travail disponible' },
   {
     id: 'consignes',
-    label: 'Consignes particulières consultées',
-    detail: 'Cuir chevelu sensible · tension légère',
+    label: 'Consignes du rendez-vous lues',
+    detail: 'Cuir chevelu sensible',
     hasSheet: true,
   },
 ]
@@ -109,17 +109,17 @@ export const INES_CHECKLIST = [
   { id: 'reconfirme', label: 'Rendez-vous reconfirmé' },
 ]
 
-/** Séquence simulateur modification (écran 14) — déterministe. */
+/** Séquence simulateur modification (écran 14). */
 export const MODIFICATION_SEQUENCE = [
   {
     id: 'consult',
     label: 'Inès consulte la proposition de modification',
-    detail: 'Ajout de perles · conséquences prix et durée.',
+    detail: 'Ajout de perles · nouveau prix et durée.',
   },
   {
     id: 'accept',
     label: 'Inès accepte la modification (+10 € · +20 min)',
-    detail: 'Consentement explicite — engagement V2.',
+    detail: 'Inès a accepté le nouveau prix et la durée.',
   },
 ]
 
@@ -146,7 +146,7 @@ export const INES_RAIL = {
   validityMinutes: 30,
   clientTasks: 'Cheveux lavés et démêlés',
   proTasks: 'Fournir les mèches et le matériel',
-  priority: 'Confort et faible tension',
+  priority: 'Confort du cuir chevelu',
   supplies: 'Mèches souhaitées auprès de la coiffeuse',
   inspirationLabel: 'Inspiration knotless mi-dos',
   /** Rail Acte D — modification perles (V2). */
@@ -179,8 +179,7 @@ export const EXTRA_DURATION_OPTIONS = [
 
 export const MODIFICATION_MOTIFS = [
   { id: 'option', label: 'Option demandée pendant la prestation' },
-  { id: 'confort', label: 'Confort / finition demandée' },
-  { id: 'autre', label: 'Autre motif', disabled: true },
+  { id: 'confort', label: 'Confort demandé pendant la prestation' },
 ]
 
 export const MODIFICATION_REFUSAL_REASONS = [
@@ -193,52 +192,40 @@ export const MODIFICATION_REFUSAL_REASONS = [
 export const COMPLETION_OPTIONS = [
   {
     id: 'full',
-    label: 'Prestation réalisée intégralement',
+    label: 'Terminer — prestation réalisée',
     rail: true,
-    detail: 'Clôture normale — engagement V2 honoré.',
-  },
-  {
-    id: 'partial',
-    label: 'Prestation réalisée partiellement',
-    rail: false,
-    detail: 'Clôture partielle — récupération démo disponible.',
-  },
-  {
-    id: 'resolution',
-    label: 'Déclencher une résolution',
-    rail: false,
-    detail: 'Protocole incident — hors cadre de la démo.',
+    detail: 'La prestation est terminée comme convenu.',
   },
 ]
 
-/** Séquence simulateur règlement (écran 16) — déterministe. */
+/** Séquence simulateur règlement (écran 16). */
 export const SETTLEMENT_SEQUENCE = [
   {
     id: 'impute',
-    label: 'Imputation du versement initial de 50 €',
-    detail: 'Acompte déjà reçu, imputé sur le total V2.',
+    label: 'Acompte de 50 € déjà reçu',
+    detail: 'Déduit du total convenu après modification.',
   },
   {
     id: 'balance',
-    label: 'Solde dû : 130 €',
-    detail: 'Total 180 € − versement initial 50 €.',
+    label: 'Reste à payer : 130 €',
+    detail: 'Total 180 € − acompte 50 €.',
   },
   {
     id: 'pay',
-    label: 'Inès règle les 130 €',
+    label: 'Inès paie les 130 €',
     detail: 'Paiement final via la plateforme.',
   },
 ]
 
-/** Avis Inès déterministe (écran 17). */
+/** Avis Inès (écran 17). */
 export const INES_REVIEW = {
   dimensions: [
     { id: 'technique', label: 'Résultat technique', score: 5 },
     { id: 'communication', label: 'Communication', score: 5 },
     { id: 'ponctualite', label: 'Ponctualité', score: 5 },
-    { id: 'prix', label: 'Conformité du prix', score: 5 },
+    { id: 'prix', label: 'Rapport qualité-prix', score: 5 },
     { id: 'confort', label: 'Confort', score: 4 },
-    { id: 'modifications', label: 'Résolution des modifications', score: 5 },
+    { id: 'modifications', label: 'Gestion des changements', score: 5 },
   ],
   comment:
     'Sarah a bien pris en compte mon cuir chevelu sensible et m’a expliqué le supplément avant d’ajouter les perles.',
@@ -271,9 +258,8 @@ export const REVIEW_REPLY_MAX = 280
 /** Préférences mémorisées Inès — lecture seule (E3). */
 export const INES_MEMORIZED_PREFS = [
   'Cuir chevelu sensible',
-  'Tension légère',
   'Mi-dos + mèches fournies',
-  'Knotless braids medium',
+  'Knotless braids moyen',
 ]
 
 export const CLARIFICATION_QUESTIONS = [
@@ -284,37 +270,43 @@ export const CLARIFICATION_QUESTIONS = [
     response: 'Voici une photo récente.',
   },
   {
-    id: 'chimique',
-    label: 'Date du dernier traitement chimique',
-    required: true,
-    response: 'Je n’ai pas fait de défrisage depuis huit mois.',
-  },
-  {
     id: 'allergies',
-    label: 'Allergies produits (complémentaire)',
+    label: 'Allergies aux produits (optionnel)',
     required: false,
     response: 'Aucune allergie connue.',
   },
 ]
 
 export const REFUSAL_REASONS = [
-  { id: 'creneau', label: 'Créneau incompatible' },
-  { id: 'budget', label: 'Budget incompatible' },
-  { id: 'technique', label: 'Technique / faisabilité' },
+  { id: 'creneau', label: 'Créneau qui ne convient pas' },
+  { id: 'budget', label: 'Budget trop bas pour moi' },
+  { id: 'technique', label: 'Pas réalisable pour moi' },
   { id: 'autre', label: 'Autre motif' },
 ]
 
+/** Critères d’invitation — libellés de base ; l’UI peut les dynamiser via le rail. */
 export const MATCH_CRITERIA = [
-  'Offre correspondante (knotless medium · mi-dos)',
-  'Créneau dérivé du planning (15 août · 9 h)',
-  'Zone compatible (Saint-Denis)',
-  'Budget compatible (max. 180 €)',
-  'Cuir chevelu sensible accepté (tension légère)',
+  'Offre correspondante (knotless moyen · mi-dos)',
+  'Créneau libre (15 août · 9 h)',
+  'Zone qui correspond (Saint-Denis)',
+  'Budget max. 180 €',
+  'Cuir chevelu sensible accepté',
 ]
+
+/** Libellés FR pour les états internes (ne pas afficher les codes machine). */
+export const STATUS_LABELS = {
+  FIRM_PROPOSAL: 'Proposition envoyée',
+  SOFT_HOLD: 'Créneau réservé 30 min',
+  COMMITTED: 'Confirmé',
+  READINESS_PENDING: 'En préparation',
+  READY: 'Prêt',
+  IN_PROGRESS: 'En cours',
+  COMPLETED: 'Terminé',
+  SETTLED: 'Payé',
+}
 
 export const FEASIBILITY_CHECKS = [
   { id: 'photo', label: 'Photo récente reçue' },
-  { id: 'chimique', label: 'Pas de défrisage depuis 8 mois' },
   { id: 'texture', label: 'Texture crépue confirmée' },
 ]
 
@@ -345,15 +337,15 @@ export const PAYMENT_OPTIONS = [
 ]
 
 export const CANCELLATION_OPTIONS = [
-  { id: 'selon-delai', label: 'Définir ses règles d’annulation' },
+  { id: 'selon-delai', label: 'Annulation selon le délai restant' },
   { id: '24h', label: 'Annulation gratuite jusqu’à 24 h avant' },
   { id: '48h', label: 'Annulation gratuite jusqu’à 48 h avant' },
 ]
 
 export const SIZE_OPTIONS = [
-  { id: 'small', label: 'Small' },
-  { id: 'medium', label: 'Medium' },
-  { id: 'large', label: 'Large' },
+  { id: 'small', label: 'Fin' },
+  { id: 'medium', label: 'Moyen' },
+  { id: 'large', label: 'Épais' },
 ]
 
 export const SERVICE_LEVEL_OPTIONS = [
@@ -425,10 +417,10 @@ export function referenceLengthId(lengthOffers = []) {
 }
 
 export const GALLERY_MOCK = [
-  { id: 'g1', label: 'Réalisation 1', tone: 'from-[#2c2418] to-[#775a19]', proof: 'Réalisation déclarée' },
-  { id: 'g2', label: 'Réalisation 2', tone: 'from-[#1b1c1c] to-[#464747]', proof: 'Réalisation déclarée' },
+  { id: 'g1', label: 'Réalisation 1', tone: 'from-[#2c2418] to-[#775a19]', proof: 'Photo de réalisation' },
+  { id: 'g2', label: 'Réalisation 2', tone: 'from-[#1b1c1c] to-[#464747]', proof: 'Photo de réalisation' },
   { id: 'g3', label: 'Réalisation 3', tone: 'from-[#271900] to-[#a17f3c]', proof: 'Inspiration' },
-  { id: 'g4', label: 'Réalisation 4', tone: 'from-[#3d2e14] to-[#e8c176]', proof: 'Réalisation déclarée' },
+  { id: 'g4', label: 'Réalisation 4', tone: 'from-[#3d2e14] to-[#e8c176]', proof: 'Photo de réalisation' },
 ]
 
 export const TASK_DEFAULTS = [
@@ -461,7 +453,7 @@ const OUI_MITIGE_NON = [
 export const ACT_FEEDBACK = {
   P: {
     id: 'P',
-    badge: 'Acte précurseur',
+    badge: 'Création de l’offre',
     title: 'Retour · Création de l’offre',
     summary:
       'Vous avez défini comment vous travaillez, créé une prestation, fixé vos conditions et défini un planning réellement disponible.',
@@ -495,10 +487,10 @@ export const ACT_FEEDBACK = {
   },
   B: {
     id: 'B',
-    badge: 'Acte B',
-    title: 'Retour · Opportunité & proposition',
+    badge: 'Demande & proposition',
+    title: 'Retour · Demande & proposition',
     summary:
-      'Vous avez examiné une demande structurée, demandé une précision si besoin, puis envoyé une offre ferme avec réserve temporaire de créneau.',
+      'Vous avez examiné une demande structurée, demandé une précision si besoin, puis envoyé une proposition avec créneau réservé temporairement.',
     questions: [
       {
         id: 'q1',
@@ -512,7 +504,7 @@ export const ACT_FEEDBACK = {
       },
       {
         id: 'q3',
-        label: 'L’offre ferme et la réserve de créneau étaient-elles claires ?',
+        label: 'La proposition et la réserve de créneau étaient-elles claires ?',
         options: OUI_PARTIEL_NON,
       },
       {
@@ -524,14 +516,14 @@ export const ACT_FEEDBACK = {
   },
   C: {
     id: 'C',
-    badge: 'Acte C',
-    title: 'Retour · Engagement & préparation',
+    badge: 'Confirmation',
+    title: 'Retour · Confirmation & préparation',
     summary:
-      'Vous avez constaté l’acceptation d’Inès, consulté les preuves, préparé le rendez-vous et avancé explicitement au jour J.',
+      'Vous avez vu l’acceptation d’Inès, consulté les détails, préparé le rendez-vous et passé au jour du rendez-vous.',
     questions: [
       {
         id: 'q1',
-        label: 'Les preuves (consentement, paiement) vous ont-elles rassurée ?',
+        label: 'Les détails (accord, paiement) vous ont-ils rassurée ?',
         options: OUI_PARTIEL_NON,
       },
       {
@@ -541,7 +533,7 @@ export const ACT_FEEDBACK = {
       },
       {
         id: 'q3',
-        label: 'Le passage explicite au jour J était-il clair ?',
+        label: 'Le passage au jour du rendez-vous était-il clair ?',
         options: OUI_PARTIEL_NON,
       },
       {
@@ -553,36 +545,36 @@ export const ACT_FEEDBACK = {
   },
   D: {
     id: 'D',
-    badge: 'Acte D',
+    badge: 'Réalisation',
     title: 'Retour · Réalisation',
     summary:
-      'Vous avez démarré la prestation, traité une modification (perles), consulté les preuves V1/V2 et clôturé la réalisation.',
+      'Vous avez démarré la prestation, traité une modification (perles), consulté ce qui a été accepté et terminé la réalisation.',
     questions: [
       {
         id: 'q1',
-        label: 'L’événement de modification (perles) était-il compréhensible ?',
+        label: 'La demande de modification (perles) était-elle compréhensible ?',
         options: OUI_PARTIEL_NON,
       },
       {
         id: 'q2',
-        label: 'Les conséquences prix et durée de la modification étaient-elles claires ?',
+        label: 'Le nouveau prix et la durée de la modification étaient-ils clairs ?',
         options: OUI_PARTIEL_NON,
       },
       {
         id: 'q3',
-        label: 'Les preuves V1 / V2 vous auraient-elles protégée en vrai ?',
+        label: 'La trace avant / après modification vous aurait-elle protégée en vrai ?',
         options: OUI_PARTIEL_NON,
       },
       {
         id: 'q4',
-        label: 'La qualification de fin de prestation était-elle claire ?',
+        label: 'Comment terminer la prestation était-il clair ?',
         options: OUI_PARTIEL_NON,
       },
     ],
   },
   E: {
     id: 'E',
-    badge: 'Acte E',
+    badge: 'Fin de démo',
     title: 'Fin de la démonstration',
     summary:
       'Vous avez reçu une demande structurée, obtenu une précision, sécurisé une proposition, préparé le rendez-vous, fait accepter une modification, reçu le règlement final et répondu à l’avis.',
@@ -600,7 +592,7 @@ export const ACT_FEEDBACK = {
       {
         id: 'q3',
         label:
-          'La checklist et la preuve de modification (perles) vous auraient-elles protégée en vrai ?',
+          'La checklist et la trace de modification (perles) vous auraient-elles protégée en vrai ?',
         options: OUI_PARTIEL_NON,
       },
       {

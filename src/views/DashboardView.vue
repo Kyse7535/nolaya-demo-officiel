@@ -100,14 +100,14 @@ function goPrimary() {
         <p class="mt-1 text-sm font-medium text-primary">Définir mon planning</p>
       </template>
       <template v-else-if="hasFirmProposal">
-        <p class="text-sm font-semibold text-primary">Proposition ferme envoyée</p>
+        <p class="text-sm font-semibold text-primary">Proposition envoyée</p>
         <p class="mt-2 text-sm text-muted">{{ cardSummary.title }}</p>
         <p class="mt-2 text-sm leading-relaxed text-muted">
-          Créneau en réserve temporaire. L’engagement (Acte C) arrive dans la suite du prototype.
+          Créneau en réserve temporaire. Ensuite : Inès peut accepter et payer l’acompte.
         </p>
       </template>
       <template v-else-if="invitationActive">
-        <p class="text-sm font-semibold text-primary">Nouvelle opportunité</p>
+        <p class="text-sm font-semibold text-primary">Nouvelle demande</p>
         <p class="mt-2 text-sm text-muted">{{ cardSummary.title }}</p>
         <p class="mt-1 text-sm text-muted">{{ cardSummary.slot }}</p>
         <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-secondary">
@@ -119,7 +119,7 @@ function goPrimary() {
         <p class="text-sm font-semibold text-primary">Planning actif</p>
         <p class="mt-2 text-sm text-muted">{{ label }}</p>
         <p class="mt-2 text-sm leading-relaxed text-muted">
-          Vous pouvez recevoir des demandes compatibles.
+          Vous pouvez recevoir des demandes qui correspondent à votre offre.
         </p>
       </template>
     </div>
@@ -153,8 +153,8 @@ function goPrimary() {
         <h2 class="text-base font-bold text-primary">Cadre professionnel</h2>
         <p class="mt-2 text-sm leading-relaxed text-muted">
           Ce n’est pas encore votre prestation. C’est comment vous travaillez : accueil, pause,
-          communication, paiement, politiques. Vous le définissez une fois, puis il s’applique
-          à vos prestations et à votre planning.
+          communication, paiement, règles. Vous le définissez une fois, puis il s’applique à vos
+          prestations et à votre planning.
         </p>
         <button type="button" class="btn-primary mt-5" @click="helpOpen = false">
           Compris

@@ -42,7 +42,7 @@ const placeLine = computed(
         <p class="mt-1 text-sm text-muted">{{ placeLine }}</p>
         <p class="mt-1 text-sm text-muted">À partir de {{ devisPreview.from }} €</p>
         <p class="mt-2 text-xs text-muted">
-          Conséquence visible : {{ schedule.consequenceLabel }}
+          Grâce à vos horaires : {{ schedule.consequenceLabel }}
         </p>
       </div>
       <p v-else class="text-sm text-muted">Aucun planning actif.</p>
@@ -50,7 +50,11 @@ const placeLine = computed(
 
     <div class="px-5 pb-6">
       <button type="button" class="btn-secondary" @click="demo.openResearch('P')">
-        {{ demo.isFeedbackSubmitted('P') ? 'Revoir mon retour (acte précurseur)' : 'Donner mon retour sur cet acte' }}
+        {{
+          demo.isFeedbackSubmitted('P')
+            ? 'Revoir mon avis sur cette étape'
+            : 'Donner mon avis sur cette étape'
+        }}
       </button>
     </div>
   </div>

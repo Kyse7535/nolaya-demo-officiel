@@ -8,11 +8,11 @@ const router = useRouter()
 const frameworkStore = useFrameworkStore()
 
 const pillars = [
-  { title: 'Contextes', body: 'Où vous travaillez et si l’adresse reste privée.' },
-  { title: 'Accueil', body: 'Accompagnants, mineurs, consignes d’accès.' },
-  { title: 'Pause', body: 'Votre droit à la pause pendant les prestations longues.' },
+  { title: 'Lieux de travail', body: 'Où vous travaillez et si l’adresse reste privée.' },
+  { title: 'Accueil', body: 'Accompagnants, mineurs, comment trouver / entrer.' },
+  { title: 'Pauses', body: 'Vos pauses pendant une longue prestation.' },
   { title: 'Communication & paiement', body: 'Comment on vous joint et comment vous êtes payée.' },
-  { title: 'Politiques & sécurité', body: 'Retard, annulation, interruption et photos.' },
+  { title: 'Règles & sécurité', body: 'Retard, annulation, interruption et photos.' },
 ]
 
 function start() {

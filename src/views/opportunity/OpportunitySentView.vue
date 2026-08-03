@@ -24,7 +24,7 @@ const nextRoute = computed(() => {
     if (opportunity.isSettled) return 'settlement-relation'
     if (opportunity.isCompleted) return 'settlement'
     if (opportunity.isInProgress) return 'execution-progress'
-    return 'execution-dossier'
+    return 'execution-jour'
   }
   if (isReady.value) return 'engagement-prep'
   if (isCommitted.value) return 'engagement-committed'
@@ -35,11 +35,11 @@ const nextLabel = computed(() => {
   if (state.value.dayJAdvanced) {
     if (opportunity.isSettled) return 'Voir l’avis et la suite'
     if (opportunity.isCompleted) return 'Voir le règlement'
-    return 'Voir le dossier du jour'
+    return 'Voir la demande du jour'
   }
   if (isReady.value) return 'Voir la préparation'
-  if (isCommitted.value) return 'Voir l’engagement'
-  return 'Continuer vers l’engagement'
+  if (isCommitted.value) return 'Voir la confirmation'
+  return 'Continuer vers la confirmation'
 })
 
 function goEngagement() {
@@ -51,22 +51,22 @@ function goEngagement() {
   <div class="flex flex-1 flex-col">
     <ScreenHeader
       title="Proposition envoyée"
-      badge="FIRM"
-      back-label="Opportunités"
+      badge="Envoyée"
+      back-label="Demandes"
       @back="router.push({ name: 'opportunity-list' })"
     />
 
     <div class="flex flex-1 flex-col px-5 pb-28 pt-5">
-      <p class="badge-mono">État · FIRM_PROPOSAL</p>
+      <p class="badge-mono">Proposition envoyée</p>
       <h1 class="mt-3 text-2xl font-bold tracking-tight text-primary">
-        Offre ferme envoyée à {{ rail.clientName }}
+        Proposition envoyée à {{ rail.clientName }}
       </h1>
       <p class="mt-2 text-sm leading-relaxed text-muted">
         <template v-if="isCommitted">
-          Engagement formé — le créneau n’est plus en réserve temporaire.
+          Rendez-vous confirmé — le créneau n’est plus en réserve temporaire.
         </template>
         <template v-else>
-          Créneau réservé temporairement. Validité :
+          Créneau réservé temporairement. Valable
           {{ state.softHoldUntilLabel || '30 min' }}.
         </template>
       </p>
@@ -81,22 +81,22 @@ function goEngagement() {
         </p>
         <p
           v-if="softHoldActive && !isCommitted"
-          class="mt-3 text-xs font-mono uppercase tracking-wide text-secondary"
+          class="mt-3 text-xs font-semibold uppercase tracking-wide text-secondary"
         >
-          SOFT_HOLD actif
+          Créneau réservé {{ rail.validityMinutes }} min
         </p>
         <p
           v-else-if="isCommitted"
-          class="mt-3 text-xs font-mono uppercase tracking-wide text-secondary"
+          class="mt-3 text-xs font-semibold uppercase tracking-wide text-secondary"
         >
-          {{ isReady ? 'READY' : 'COMMITTED' }}
+          {{ isReady ? 'Prêt' : 'Confirmé' }}
         </p>
       </div>
 
       <div class="mt-5 rounded-card border border-secondary/30 bg-secondary-container/20 px-3 py-3">
-        <p class="text-sm font-semibold text-on-secondary-container">Acte C — Engagement</p>
+        <p class="text-sm font-semibold text-on-secondary-container">Ensuite</p>
         <p class="mt-1 text-sm text-muted">
-          Constater l’acceptation d’Inès, consulter les preuves, puis préparer le rendez-vous.
+          Inès accepte, paie l’acompte, puis vous préparez le rendez-vous.
         </p>
       </div>
 
@@ -104,15 +104,15 @@ function goEngagement() {
         <button
           type="button"
           class="btn-secondary"
-          @click="router.push({ name: 'opportunity-dossier' })"
+          @click="router.push({ name: 'opportunity-demande' })"
         >
-          Revoir le dossier
+          Revoir la demande
         </button>
         <button type="button" class="btn-ghost mx-auto block" @click="demo.openResearch('B')">
           {{
             demo.isFeedbackSubmitted('B')
-              ? 'Revoir mon retour (acte B)'
-              : 'Donner mon retour sur cet acte'
+              ? 'Revoir mon avis sur cette étape'
+              : 'Donner mon avis sur cette étape'
           }}
         </button>
       </div>
