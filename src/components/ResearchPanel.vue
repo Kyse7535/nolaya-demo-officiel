@@ -14,6 +14,9 @@ const {
   canSubmitFeedback,
   researchConfig,
   researchActId,
+  netlifySynced,
+  netlifySubmitting,
+  lastNetlifyError,
 } = storeToRefs(demo)
 const { rail, isSettled, hasReviewReply, netRevenue } = storeToRefs(opportunity)
 
@@ -32,6 +35,10 @@ function onSubmit() {
 
 function onContinue() {
   demo.closeResearch()
+}
+
+async function onSendAll() {
+  await demo.submitSessionToNetlify()
 }
 
 function onExportArchive() {
@@ -69,6 +76,29 @@ function onExportArchive() {
             ({{ new Date(feedback.submittedAt).toLocaleString('fr-FR') }})
           </span>.
         </p>
+
+        <template v-if="isFinalAct">
+          <p v-if="netlifySynced" class="mt-2 text-xs font-medium text-on-secondary-container">
+            Ensemble de vos réponses envoyé — merci.
+          </p>
+          <p v-else-if="netlifySubmitting" class="mt-2 text-xs text-muted">
+            Envoi de vos réponses en cours…
+          </p>
+          <p v-else class="mt-2 text-xs text-muted">
+            Vos retours sont prêts à être envoyés en un seul ensemble.
+            <span v-if="lastNetlifyError"> L’envoi précédent a échoué — vous pouvez réessayer.</span>
+          </p>
+          <button
+            v-if="!netlifySynced"
+            type="button"
+            class="btn-primary mt-3"
+            :disabled="netlifySubmitting"
+            @click="onSendAll"
+          >
+            {{ netlifySubmitting ? 'Envoi…' : 'Envoyer mes réponses' }}
+          </button>
+        </template>
+
         <button type="button" class="btn-ghost mt-2 text-xs" @click="onExportArchive">
           Exporter l’archive (console / presse-papiers)
         </button>
@@ -130,7 +160,7 @@ function onExportArchive() {
           class="btn-primary"
           :disabled="!canSubmitFeedback"
         >
-          Enregistrer mon retour
+          {{ isFinalAct ? 'Enregistrer et envoyer mes réponses' : 'Enregistrer mon retour' }}
         </button>
       </form>
 

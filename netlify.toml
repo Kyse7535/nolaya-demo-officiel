@@ -4,3 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Formulaire `tester-responses` détecté via le markup statique dans index.html.
+# Soumissions runtime : POST `/` (application/x-www-form-urlencoded) depuis l’app.
+# Voir les réponses : Netlify → Site → Forms → tester-responses.

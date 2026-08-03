@@ -14,6 +14,31 @@
   </head>
   <body>
     <div id="app"></div>
+    <!--
+      Formulaire statique pour détection Netlify Forms au build.
+      Les soumissions runtime passent par fetch (application/x-www-form-urlencoded).
+    -->
+    <form
+      name="tester-responses"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      netlify
+      hidden
+    >
+      <input type="hidden" name="form-name" value="tester-responses" />
+      <input name="bot-field" />
+      <input name="prenom" />
+      <input name="instagram" />
+      <input name="tiktok" />
+      <input name="telephone" />
+      <input name="email" />
+      <input name="whatsapp" />
+      <input name="session-id" />
+      <input name="submitted-at" />
+      <input name="demo-version" />
+      <textarea name="payload"></textarea>
+    </form>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

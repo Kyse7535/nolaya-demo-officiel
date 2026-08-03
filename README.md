@@ -39,6 +39,16 @@ npm run dev
 
 Build : `npm run build`
 
+## Collecte des retours testeuses (Netlify Forms)
+
+Au démarrage, chaque coiffeuse indique son **prénom** et au moins un **contact** (Instagram, TikTok, WhatsApp, téléphone ou e-mail). Les retours ResearchPanel (actes P→E) sont agrégés en session locale, puis envoyés en **un seul payload** à la fin (acte E) via le formulaire Netlify `tester-responses`.
+
+**Où voir les réponses :** [Netlify](https://app.netlify.com) → site `nolaya-demo-officiel` → **Forms** → `tester-responses`.  
+Chaque soumission expose les champs plats (prénom, contacts…) et le champ `payload` (JSON complet : identité + `answersByAct`).
+
+Optionnel : dans Forms → Settings, activer les notifications e-mail / Slack pour chaque nouvel envoi.  
+Aucun secret n’est requis pour la soumission basique Netlify Forms.
+
 ## Parcours
 
 ### Précurseur (Scène 1/3 → 3/3)

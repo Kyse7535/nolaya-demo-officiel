@@ -13,18 +13,31 @@ import {
   createEmptyFeedbackByAct,
   getActFeedbackConfig,
 } from '../domain/model'
+import { createEmptyContacts, hasAnyContact, normalizeContacts } from '../utils/contacts'
+import { submitTesterResponse } from '../utils/netlifySubmit'
+import { notifyError, notifySuccess } from '../utils/toast'
+import packageJson from '../../package.json'
 
 const FEEDBACK_KEY_LEGACY = 'demo-precurseur.feedback'
 /** Ancien format plat : { P: {...}, B: {...}, ... } */
 const FEEDBACK_BY_ACT_KEY = 'demo-precurseur.feedbackByAct'
 /**
  * Archive regroupée par participante.
- * Shape : { users: { [name]: { name, startedAt, feedbackByAct } }, currentUserName }
+ * Shape : {
+ *   users: {
+ *     [name]: {
+ *       name, contacts, sessionId, startedAt, feedbackByAct,
+ *       netlifySubmittedAt, lastNetlifyError
+ *     }
+ *   },
+ *   currentUserName
+ * }
  * Les retours soumis sont conservés au reset du parcours (seule la session journey est effacée).
  */
 const ARCHIVE_KEY = 'demo-precurseur.feedbackArchive'
 
 const DEFAULT_STYLIST_NAME = 'Sarah'
+const DEMO_VERSION = `demo-precurseur@${packageJson.version || '0.0.0'}`
 
 function normalizeActFeedback(actId, raw) {
   const empty = createEmptyActFeedback(actId)
@@ -58,6 +71,13 @@ function userKey(name) {
   return String(name || '').trim()
 }
 
+function newSessionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `sess-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 /** Charge un éventuel plat legacy (feedbackByAct ou feedback E seul). */
 function loadLegacyFlatFeedback() {
   try {
@@ -77,6 +97,29 @@ function loadLegacyFlatFeedback() {
   return null
 }
 
+function normalizeUserEntry(key, entry) {
+  if (!entry || typeof entry !== 'object') {
+    return {
+      name: key,
+      contacts: createEmptyContacts(),
+      sessionId: newSessionId(),
+      startedAt: new Date().toISOString(),
+      feedbackByAct: createEmptyFeedbackByAct(),
+      netlifySubmittedAt: null,
+      lastNetlifyError: null,
+    }
+  }
+  return {
+    name: entry.name || key,
+    contacts: normalizeContacts(entry.contacts),
+    sessionId: entry.sessionId || newSessionId(),
+    startedAt: entry.startedAt || null,
+    feedbackByAct: normalizeFeedbackByAct(entry.feedbackByAct),
+    netlifySubmittedAt: entry.netlifySubmittedAt || null,
+    lastNetlifyError: entry.lastNetlifyError || null,
+  }
+}
+
 function loadArchive() {
   const empty = createEmptyArchive()
   try {
@@ -92,11 +135,7 @@ function loadArchive() {
         const src = parsed.users && typeof parsed.users === 'object' ? parsed.users : {}
         for (const [key, entry] of Object.entries(src)) {
           if (!key || !entry || typeof entry !== 'object') continue
-          users[key] = {
-            name: entry.name || key,
-            startedAt: entry.startedAt || null,
-            feedbackByAct: normalizeFeedbackByAct(entry.feedbackByAct),
-          }
+          users[key] = normalizeUserEntry(key, entry)
         }
         return {
           users,
@@ -118,11 +157,9 @@ function ensureUserEntry(archive, name) {
   const key = userKey(name)
   if (!key) return null
   if (!archive.users[key]) {
-    archive.users[key] = {
-      name: key,
-      startedAt: new Date().toISOString(),
-      feedbackByAct: createEmptyFeedbackByAct(),
-    }
+    archive.users[key] = normalizeUserEntry(key, null)
+  } else {
+    archive.users[key] = normalizeUserEntry(key, archive.users[key])
   }
   return archive.users[key]
 }
@@ -130,8 +167,14 @@ function ensureUserEntry(archive, name) {
 export const useDemoStore = defineStore('demo', () => {
   const archive = ref(loadArchive())
   const stylistName = ref(archive.value.currentUserName || '')
+  const stylistContacts = ref(
+    stylistName.value && archive.value.users[stylistName.value]
+      ? normalizeContacts(archive.value.users[stylistName.value].contacts)
+      : createEmptyContacts(),
+  )
   const researchOpen = ref(false)
   const researchActId = ref('E')
+  const netlifySubmitting = ref(false)
 
   // Feedback de la session courante (bucket de la participante active)
   const feedbackByAct = ref(
@@ -147,6 +190,16 @@ export const useDemoStore = defineStore('demo', () => {
   const displayName = computed(() => userKey(stylistName.value) || DEFAULT_STYLIST_NAME)
 
   const hasStylistName = computed(() => userKey(stylistName.value).length > 0)
+
+  const currentUserEntry = computed(() => {
+    const key = userKey(stylistName.value)
+    if (!key) return null
+    return archive.value.users[key] || null
+  })
+
+  const netlifySubmittedAt = computed(() => currentUserEntry.value?.netlifySubmittedAt || null)
+  const netlifySynced = computed(() => !!netlifySubmittedAt.value)
+  const lastNetlifyError = computed(() => currentUserEntry.value?.lastNetlifyError || null)
 
   /**
    * Étapes grand public (1–8) pour le bandeau — sans « Scène / Acte ».
@@ -248,7 +301,11 @@ export const useDemoStore = defineStore('demo', () => {
     return structuredOk && artificialOk
   })
 
-  function syncCurrentUserBucket() {
+  const hasAnyFeedbackSubmitted = computed(() =>
+    DEMO_ACT_IDS.some((id) => !!feedbackByAct.value[id]?.submittedAt),
+  )
+
+  function syncCurrentUserBucket(extra = {}) {
     const key = userKey(stylistName.value)
     if (!key) return
     const next = {
@@ -258,6 +315,8 @@ export const useDemoStore = defineStore('demo', () => {
     }
     const entry = ensureUserEntry(next, key)
     entry.feedbackByAct = normalizeFeedbackByAct(feedbackByAct.value)
+    entry.contacts = normalizeContacts(stylistContacts.value)
+    Object.assign(entry, extra)
     archive.value = next
     persistArchive(next)
   }
@@ -326,6 +385,92 @@ export const useDemoStore = defineStore('demo', () => {
     patchCurrentFeedback({ comment: value })
   }
 
+  /** Snapshot JSON cohérent de la session testeuse (identité + tous les actes). */
+  function buildSessionPayload() {
+    const key = userKey(stylistName.value)
+    const entry = key ? archive.value.users[key] : null
+    const contacts = normalizeContacts(stylistContacts.value || entry?.contacts)
+    const byAct = normalizeFeedbackByAct(feedbackByAct.value)
+    const submittedAt = new Date().toISOString()
+
+    const answersByAct = Object.fromEntries(
+      DEMO_ACT_IDS.map((id) => {
+        const act = byAct[id]
+        const cfg = getActFeedbackConfig(id)
+        return [
+          id,
+          {
+            actId: id,
+            badge: cfg.badge,
+            title: cfg.title,
+            submittedAt: act.submittedAt || null,
+            answers: { ...act.answers },
+            artificialMoment: act.artificialMoment || '',
+            comment: act.comment || '',
+          },
+        ]
+      }),
+    )
+
+    return {
+      form: 'tester-responses',
+      sessionId: entry?.sessionId || newSessionId(),
+      submittedAt,
+      demoVersion: DEMO_VERSION,
+      identity: {
+        name: key || displayName.value,
+        contacts,
+      },
+      answersByAct,
+      summary: {
+        actsRecorded: DEMO_ACT_IDS.filter((id) => !!byAct[id]?.submittedAt),
+        actsPending: DEMO_ACT_IDS.filter((id) => !byAct[id]?.submittedAt),
+      },
+    }
+  }
+
+  /**
+   * Envoie l’ensemble des réponses vers Netlify Forms.
+   * Ne bloque pas le parcours en cas d’échec (toast + retry possible).
+   */
+  async function submitSessionToNetlify({ silent = false } = {}) {
+    const key = userKey(stylistName.value)
+    if (!key) {
+      if (!silent) notifyError('Indiquez d’abord votre prénom pour envoyer vos réponses.')
+      return false
+    }
+    if (netlifySubmitting.value) return false
+
+    syncCurrentUserBucket()
+    const payload = buildSessionPayload()
+    netlifySubmitting.value = true
+
+    try {
+      await submitTesterResponse(payload)
+      syncCurrentUserBucket({
+        netlifySubmittedAt: payload.submittedAt,
+        lastNetlifyError: null,
+        sessionId: payload.sessionId,
+      })
+      if (!silent) {
+        notifySuccess('Vos réponses ont bien été envoyées. Merci !')
+      }
+      return true
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Envoi impossible pour le moment'
+      syncCurrentUserBucket({ lastNetlifyError: message })
+      if (!silent) {
+        notifyError('Envoi impossible. Vous pouvez réessayer sans quitter la démo.')
+      }
+      return false
+    } finally {
+      netlifySubmitting.value = false
+    }
+  }
+
   function submitFeedback() {
     if (!canSubmitFeedback.value) return false
     const key = userKey(stylistName.value)
@@ -340,16 +485,23 @@ export const useDemoStore = defineStore('demo', () => {
     // Nettoyage des anciens formats plats une fois migrés / remplacés
     localStorage.removeItem(FEEDBACK_BY_ACT_KEY)
     localStorage.removeItem(FEEDBACK_KEY_LEGACY)
+
+    // À la clôture (acte E), envoi agrégé vers Netlify — non bloquant.
+    if (id === 'E') {
+      void submitSessionToNetlify()
+    }
     return true
   }
 
   /**
-   * Enregistre le prénom saisi au démarrage et charge le bucket de retours associé.
+   * Enregistre le prénom + contacts au démarrage et charge le bucket de retours associé.
    * Si un plat legacy existe encore et que l’utilisatrice n’a pas de bucket, on le migre.
    */
-  function startAs(name) {
+  function startAs(name, contacts = {}) {
     const key = userKey(name)
     if (!key) return false
+    const normalized = normalizeContacts(contacts)
+    if (!hasAnyContact(normalized)) return false
 
     const next = {
       ...archive.value,
@@ -357,6 +509,12 @@ export const useDemoStore = defineStore('demo', () => {
       users: { ...archive.value.users },
     }
     const entry = ensureUserEntry(next, key)
+    entry.contacts = normalized
+    // Nouvelle session de parcours : nouvel id si pas encore d’envoi Netlify
+    if (!entry.netlifySubmittedAt) {
+      entry.sessionId = newSessionId()
+      entry.startedAt = entry.startedAt || new Date().toISOString()
+    }
 
     const legacyFlat = loadLegacyFlatFeedback()
     const hasAnySubmitted = DEMO_ACT_IDS.some((id) => entry.feedbackByAct?.[id]?.submittedAt)
@@ -369,6 +527,7 @@ export const useDemoStore = defineStore('demo', () => {
     archive.value = next
     persistArchive(next)
     stylistName.value = key
+    stylistContacts.value = normalized
     feedbackByAct.value = normalizeFeedbackByAct(entry.feedbackByAct)
     promptedDismissed.value = {}
     return true
@@ -386,6 +545,7 @@ export const useDemoStore = defineStore('demo', () => {
     feedbackByAct.value = createEmptyFeedbackByAct()
     promptedDismissed.value = {}
     stylistName.value = ''
+    stylistContacts.value = createEmptyContacts()
   }
 
   /** Alias historique : n’efface plus l’archive multi-users, seulement les drafts session. */
@@ -398,7 +558,9 @@ export const useDemoStore = defineStore('demo', () => {
   function exportFeedbackArchive() {
     const payload = {
       exportedAt: new Date().toISOString(),
+      demoVersion: DEMO_VERSION,
       currentUserName: archive.value.currentUserName || stylistName.value || null,
+      currentSession: buildSessionPayload(),
       users: archive.value.users,
     }
     console.info('[demo-precurseur] feedback archive', payload)
@@ -417,6 +579,7 @@ export const useDemoStore = defineStore('demo', () => {
     const key = userKey(stylistName.value)
     if (key && archive.value.users[key]) {
       feedbackByAct.value = normalizeFeedbackByAct(archive.value.users[key].feedbackByAct)
+      stylistContacts.value = normalizeContacts(archive.value.users[key].contacts)
     } else {
       feedbackByAct.value = createEmptyFeedbackByAct()
     }
@@ -434,6 +597,7 @@ export const useDemoStore = defineStore('demo', () => {
     return {
       stylistName: stylistName.value || null,
       displayName: displayName.value,
+      contacts: normalizeContacts(stylistContacts.value),
       framework: framework.status,
       offer: offer.status === OfferStatus.NONE ? 'NONE' : offer.status,
       schedule: schedule.status === ScheduleStatus.NONE ? 'NONE' : schedule.status,
@@ -450,6 +614,8 @@ export const useDemoStore = defineStore('demo', () => {
       feedback: feedbackStatus,
       feedbackAny: DEMO_ACT_IDS.some((id) => isFeedbackSubmitted(id)) ? 'RECORDED' : 'NONE',
       feedbackUsers: Object.keys(archive.value.users || {}),
+      netlifySynced: netlifySynced.value,
+      netlifySubmittedAt: netlifySubmittedAt.value,
     }
   }
 
@@ -460,6 +626,7 @@ export const useDemoStore = defineStore('demo', () => {
     feedbackByAct,
     feedback,
     stylistName,
+    stylistContacts,
     displayName,
     hasStylistName,
     sceneMeta,
@@ -467,6 +634,11 @@ export const useDemoStore = defineStore('demo', () => {
     sceneLabel,
     feedbackSubmitted,
     canSubmitFeedback,
+    hasAnyFeedbackSubmitted,
+    netlifySubmitting,
+    netlifySubmittedAt,
+    netlifySynced,
+    lastNetlifyError,
     isFeedbackSubmitted,
     openResearch,
     promptActFeedback,
@@ -475,6 +647,8 @@ export const useDemoStore = defineStore('demo', () => {
     setArtificialMoment,
     setComment,
     submitFeedback,
+    buildSessionPayload,
+    submitSessionToNetlify,
     startAs,
     clearFeedback,
     clearFeedbackArchive,

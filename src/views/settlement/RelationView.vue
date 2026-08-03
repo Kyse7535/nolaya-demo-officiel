@@ -24,7 +24,7 @@ const {
   memorizedPrefs,
   netRevenue,
 } = storeToRefs(opportunity)
-const { displayName } = storeToRefs(demo)
+const { displayName, netlifySynced, netlifySubmitting, lastNetlifyError } = storeToRefs(demo)
 
 const reviewComment = computed(() =>
   INES_REVIEW.comment.replace(/\bSarah\b/g, displayName.value),
@@ -89,12 +89,21 @@ function onThanksClose() {
   sheet.value = null
 }
 
+async function onSendResponses() {
+  await demo.submitSessionToNetlify()
+}
+
 watch(
   () => demo.isFeedbackSubmitted('E'),
   (submitted) => {
     if (submitted && demo.researchOpen && demo.researchActId === 'E') {
-      demo.closeResearch()
-      sheet.value = 'thanks'
+      // Laisser le temps à l’envoi Netlify auto avant la feuille « merci »
+      window.setTimeout(() => {
+        if (demo.researchOpen && demo.researchActId === 'E') {
+          demo.closeResearch()
+          sheet.value = 'thanks'
+        }
+      }, 900)
     }
   },
 )
@@ -357,6 +366,31 @@ watch(
           <strong>{{ netRevenue }} €</strong>
           <span v-if="hasReviewReply"> · réponse à l’avis envoyée</span>.
         </p>
+
+        <div
+          v-if="demo.isFeedbackSubmitted('E')"
+          class="mt-4 rounded-card border border-outline-soft bg-surface-low px-3 py-3"
+        >
+          <p v-if="netlifySynced" class="text-sm font-semibold text-primary">
+            Vos réponses ont bien été envoyées. Merci.
+          </p>
+          <template v-else>
+            <p class="text-sm font-semibold text-primary">Envoyer l’ensemble de vos réponses</p>
+            <p class="mt-1 text-xs text-muted">
+              Cela regroupe votre prénom, vos contacts et tous vos retours du parcours.
+              <span v-if="lastNetlifyError"> L’envoi précédent a échoué — réessayez.</span>
+            </p>
+            <button
+              type="button"
+              class="btn-primary mt-3"
+              :disabled="netlifySubmitting"
+              @click="onSendResponses"
+            >
+              {{ netlifySubmitting ? 'Envoi…' : 'Envoyer mes réponses' }}
+            </button>
+          </template>
+        </div>
+
         <button
           type="button"
           class="btn-primary mt-5"
