@@ -7,6 +7,7 @@ import { useOfferStore } from '../../stores/offer'
 import { useScheduleStore } from '../../stores/schedule'
 import { useFrameworkStore } from '../../stores/framework'
 import { GALLERY_MOCK, contextsSummary } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const offerStore = useOfferStore()
@@ -39,15 +40,22 @@ function openSchedule() {
       Voici comment elle apparaît côté cliente. Ensuite : vos dispos pour recevoir des demandes.
     </p>
 
+    <div class="mt-4 overflow-hidden border border-outline-soft">
+      <img :src="STITCH.s16Hero" alt="" class="hero-media h-36 w-full" />
+    </div>
+
     <p class="field-label mt-5">Vue cliente</p>
-    <article class="overflow-hidden rounded-card border border-outline-soft bg-surface shadow-sm">
+    <article class="editorial-card overflow-hidden">
       <div class="grid grid-cols-3 gap-0.5 bg-surface-low">
-        <div
-          v-for="item in galleryItems.slice(0, 3)"
-          :key="item.id"
-          class="h-24 bg-gradient-to-br"
-          :class="item.tone"
-        />
+        <div v-for="item in galleryItems.slice(0, 3)" :key="item.id" class="relative h-24">
+          <img
+            v-if="item.src"
+            :src="item.src"
+            alt=""
+            class="hero-media absolute inset-0 h-full w-full"
+          />
+          <div v-else class="h-full bg-gradient-to-br" :class="item.tone" />
+        </div>
         <div
           v-if="galleryItems.length === 0"
           class="col-span-3 flex h-24 items-center justify-center text-xs text-muted"

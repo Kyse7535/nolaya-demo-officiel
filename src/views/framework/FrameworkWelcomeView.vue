@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
 import { useFrameworkStore } from '../../stores/framework'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const frameworkStore = useFrameworkStore()
@@ -35,10 +36,8 @@ function start() {
         Ce n’est pas encore votre prestation. C’est le cadre dans lequel vous acceptez de travailler.
       </p>
 
-      <div
-        class="mt-5 overflow-hidden rounded-card bg-gradient-to-br from-[#1b1c1c] to-[#775a19] px-4 py-8 text-on-primary"
-      >
-        <p class="text-sm font-medium opacity-90">Rendre votre façon de travailler claire et prévisible.</p>
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s03Hero" alt="" class="hero-media h-44 w-full" />
       </div>
 
       <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-secondary">
@@ -46,12 +45,19 @@ function start() {
       </p>
       <ul class="mt-3 space-y-3">
         <li
-          v-for="p in pillars"
+          v-for="(p, i) in pillars"
           :key="p.title"
-          class="rounded-card border border-outline-soft bg-surface px-3 py-3"
+          class="editorial-card flex items-start gap-3 px-3 py-3"
         >
-          <p class="text-sm font-semibold text-primary">{{ p.title }}</p>
-          <p class="mt-1 text-sm text-muted">{{ p.body }}</p>
+          <span
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-high font-mono text-[10px] font-bold text-primary"
+          >
+            {{ i + 1 }}
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-primary">{{ p.title }}</p>
+            <p class="mt-0.5 text-sm text-muted">{{ p.body }}</p>
+          </div>
         </li>
       </ul>
 

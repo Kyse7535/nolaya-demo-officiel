@@ -3,12 +3,16 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useOfferStore } from '../../stores/offer'
 import { LENGTH_OPTIONS, PRESTATION_CATALOG, SIZE_OPTIONS } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useOfferStore()
 const { offer, hasEnabledLength, hasEnabledSize } = storeToRefs(store)
+
+const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
 
 function isLengthEnabled(id) {
   return offer.value.lengthOffers.some((o) => o.id === id && o.enabled)
@@ -20,19 +24,22 @@ function isLengthEnabled(id) {
     <ScreenHeader
       title="Prestation"
       badge="Brouillon"
+      icon="close"
       @back="router.push({ name: 'framework-bridge' })"
     />
 
     <div class="flex-1 px-5 py-5">
-      <p class="text-xs text-secondary">Étape 1 / 4 · Prestation</p>
-      <h2 class="screen-title mt-1">Prestation et longueurs</h2>
+      <p class="font-mono text-[10px] uppercase tracking-wider text-muted">Étape 2 sur 8</p>
+      <FlowStepper class="mt-3" :steps="steps" :current="1" />
+
+      <h2 class="screen-title mt-5">Prestation et longueurs</h2>
       <p class="screen-lead">
         Choisissez ce que vous proposez. Activez les longueurs : chacune aura ensuite son propre
         prix.
       </p>
 
       <p class="field-label mt-6">Type de prestation</p>
-      <div class="space-y-2">
+      <div class="grid grid-cols-1 gap-2">
         <button
           v-for="p in PRESTATION_CATALOG"
           :key="p.id"
@@ -41,19 +48,28 @@ function isLengthEnabled(id) {
           :class="{ 'choice-active': offer.prestationId === p.id }"
           @click="store.patch({ prestationId: p.id })"
         >
-          {{ p.label }}
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">
+              {{ offer.prestationId === p.id ? 'check_circle' : 'radio_button_unchecked' }}
+            </span>
+            {{ p.label }}
+          </span>
         </button>
       </div>
 
       <p class="field-label mt-6">Épaisseur</p>
       <p class="mb-2 text-xs text-muted">Vous pouvez en choisir plusieurs.</p>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="flex flex-wrap gap-2">
         <button
           v-for="s in SIZE_OPTIONS"
           :key="s.id"
           type="button"
-          class="choice text-center"
-          :class="{ 'choice-active': offer.sizes.includes(s.id) }"
+          class="rounded-card border px-4 py-2 text-sm transition"
+          :class="
+            offer.sizes.includes(s.id)
+              ? 'border-primary bg-primary text-on-primary'
+              : 'border-outline-soft bg-surface text-primary'
+          "
           @click="store.toggleSize(s.id)"
         >
           {{ s.label }}
@@ -74,15 +90,33 @@ function isLengthEnabled(id) {
           @click="store.toggleLength(l.id)"
         >
           <span class="flex items-center justify-between gap-2">
-            <span>
-              {{ l.label }}
-              <span v-if="index === 0" class="ml-1 text-xs text-muted">(longueur de départ)</span>
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px]">
+                {{ isLengthEnabled(l.id) ? 'check_box' : 'check_box_outline_blank' }}
+              </span>
+              <span>
+                {{ l.label }}
+                <span v-if="index === 0" class="ml-1 text-xs text-muted">(longueur de départ)</span>
+              </span>
             </span>
-            <span class="text-xs font-semibold text-secondary">
-              {{ isLengthEnabled(l.id) ? 'Activée' : 'Non' }}
+            <span
+              v-if="isLengthEnabled(l.id) && index === 0"
+              class="rounded-card border border-primary px-2 py-0.5 font-mono text-[9px] font-bold uppercase"
+            >
+              Réf.
             </span>
           </span>
         </button>
+      </div>
+
+      <div class="mt-6 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s11Hero" alt="" class="hero-media h-40 w-full" />
+        <div class="flex items-center justify-between bg-surface px-3 py-2">
+          <span class="font-mono text-[10px] uppercase tracking-wider text-muted">
+            Aperçu visuel
+          </span>
+          <span class="material-symbols-outlined text-[16px] text-outline">info</span>
+        </div>
       </div>
     </div>
 

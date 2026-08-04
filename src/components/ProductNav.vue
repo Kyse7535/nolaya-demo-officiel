@@ -46,18 +46,21 @@ const items = computed(() => [
   {
     id: 'accueil',
     label: 'Accueil',
+    icon: 'home',
     active: route.name === 'dashboard',
     action: () => router.push({ name: 'dashboard' }),
   },
   {
     id: 'demandes',
     label: 'Demandes',
+    icon: 'chat_bubble',
     active: onOpportunityOrEngagement.value && !onSettlement.value && !onExecution.value,
     action: scheduleActive.value && !onSettlement.value ? goTransactionFollowUp : null,
   },
   {
     id: 'rdv',
     label: onSettlement.value ? 'Paiement' : 'Rendez-vous',
+    icon: onSettlement.value ? 'payments' : 'calendar_today',
     active: onExecution.value || onSettlement.value,
     action: opportunity.state.dayJAdvanced
       ? () => {
@@ -71,6 +74,7 @@ const items = computed(() => [
   {
     id: 'prestations',
     label: 'Prestations',
+    icon: 'content_cut',
     active:
       String(route.name || '').startsWith('offer') ||
       String(route.name || '').startsWith('schedule'),
@@ -80,28 +84,36 @@ const items = computed(() => [
       else router.push({ name: 'dashboard' })
     },
   },
-  { id: 'profil', label: 'Profil · bientôt', active: false, action: null },
+  { id: 'profil', label: 'Profil', icon: 'person', active: false, action: null },
 ])
 </script>
 
 <template>
-  <nav class="sticky bottom-0 z-30 border-t border-outline-soft/70 bg-background/95 px-1 py-1.5 backdrop-blur">
+  <nav
+    class="sticky bottom-0 z-30 border-t border-outline-soft/70 bg-surface/95 px-1 py-1.5 backdrop-blur"
+  >
     <ul class="grid grid-cols-5 gap-0.5">
       <li v-for="item in items" :key="item.id">
         <button
           type="button"
-          class="flex w-full flex-col items-center rounded-card px-0.5 py-1.5 text-[10px] font-medium leading-tight"
-          :class="item.active ? 'text-secondary' : 'text-muted'"
+          class="flex w-full flex-col items-center rounded-card px-0.5 py-1.5 font-mono text-[9px] font-medium uppercase tracking-wider leading-tight"
+          :class="item.active ? 'text-primary' : 'text-outline'"
           :disabled="!item.action"
           @click="item.action?.()"
         >
-          <span class="relative">
-            {{ item.label }}
+          <span class="relative mb-0.5">
+            <span
+              class="material-symbols-outlined text-[20px]"
+              :class="item.active ? 'icon-filled' : ''"
+            >
+              {{ item.icon }}
+            </span>
             <span
               v-if="item.id === 'demandes' && isInjected && !hasFirmProposal && scheduleActive"
-              class="absolute -right-1.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-secondary"
+              class="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-secondary"
             />
           </span>
+          <span class="truncate">{{ item.label }}</span>
         </button>
       </li>
     </ul>

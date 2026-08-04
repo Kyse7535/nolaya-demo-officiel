@@ -3,12 +3,16 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useFrameworkStore } from '../../stores/framework'
 import { PAUSE_OPTIONS } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useFrameworkStore()
 const { framework } = storeToRefs(store)
+
+const steps = ['Contextes', 'Accueil', 'Pause', 'Communication', 'Politiques']
 </script>
 
 <template>
@@ -20,7 +24,13 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Vos pauses pendant une longue prestation</h2>
+      <FlowStepper :steps="steps" :current="3" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s06Hero" alt="" class="hero-media h-36 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Vos pauses pendant une longue prestation</h2>
       <p class="screen-lead">
         Pendant une prestation longue, vous pouvez prévoir des pauses. Elles font partie de votre
         cadre.

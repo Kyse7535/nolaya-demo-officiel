@@ -8,6 +8,7 @@ import { useFrameworkStore } from '../../stores/framework'
 import { useDemoStore } from '../../stores/demo'
 import { useOpportunityStore } from '../../stores/opportunity'
 import { contextsSummary } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const offerStore = useOfferStore()
@@ -43,16 +44,30 @@ function continueToDemand() {
 
 <template>
   <div class="flex flex-1 flex-col px-5 pb-6 pt-8">
-    <p class="badge-mono">Planning actif</p>
-    <h1 class="mt-3 text-2xl font-bold tracking-tight text-primary">
-      Vous pouvez maintenant recevoir des demandes
-    </h1>
+    <div class="overflow-hidden border border-outline-soft">
+      <img :src="STITCH.s19Hero" alt="" class="hero-media h-40 w-full" />
+    </div>
 
-    <div class="mt-6 rounded-card border border-outline-soft bg-surface p-4">
+    <div class="mt-5 flex items-center gap-3">
+      <img
+        :src="STITCH.s19Avatar"
+        alt=""
+        class="h-12 w-12 rounded-full border border-outline-soft object-cover"
+      />
+      <div>
+        <p class="badge-mono">Planning actif</p>
+        <h1 class="mt-1 text-xl font-bold tracking-tight text-primary">
+          Vous pouvez maintenant recevoir des demandes
+        </h1>
+      </div>
+    </div>
+
+    <div class="editorial-card mt-6 p-4">
       <p class="text-sm font-semibold text-primary">{{ label }}</p>
-      <p class="mt-1 text-sm text-muted">{{ hoursSummary }}</p>
+      <p class="mt-1 font-mono text-xs text-muted">{{ hoursSummary }}</p>
       <p class="mt-1 text-sm text-muted">
-        {{ placeLine }} · à partir de {{ devisPreview.from }} €
+        {{ placeLine }} · à partir de
+        <span class="font-mono font-semibold text-primary">{{ devisPreview.from }} €</span>
       </p>
       <p class="mt-2 text-sm text-muted">
         Grâce à vos horaires, {{ schedule.consequenceLabel }} peut recevoir une demande.
@@ -80,8 +95,9 @@ function continueToDemand() {
     </div>
 
     <div class="mt-auto space-y-2 pt-8">
-      <button type="button" class="btn-primary" @click="continueToDemand">
+      <button type="button" class="btn-primary flex items-center justify-center gap-2" @click="continueToDemand">
         {{ hasFirmProposal ? 'Voir le suivi' : 'Voir la demande' }}
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
       </button>
       <button type="button" class="btn-secondary" @click="router.push({ name: 'schedule-liste' })">
         Voir mon planning

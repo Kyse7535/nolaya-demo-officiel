@@ -3,11 +3,15 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useOfferStore } from '../../stores/offer'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useOfferStore()
 const { offer } = storeToRefs(store)
+
+const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
 </script>
 
 <template>
@@ -19,8 +23,13 @@ const { offer } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <p class="text-xs text-secondary">Étape 3 / 4 · Préparation</p>
-      <h2 class="screen-title mt-1">Préparation avant le rendez-vous</h2>
+      <FlowStepper :steps="steps" :current="3" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s13Hero" alt="" class="hero-media h-36 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Préparation avant le rendez-vous</h2>
       <p class="screen-lead">
         Indiquez clairement ce que la cliente doit préparer avant de venir (ex. cheveux lavés et
         démêlés).

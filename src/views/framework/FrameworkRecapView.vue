@@ -51,11 +51,11 @@ function activate() {
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Récapitulatif</h2>
+      <h2 class="screen-title">Récapitulatif du cadre</h2>
       <p class="screen-lead">Relisez vos règles avant de les activer.</p>
 
       <dl class="mt-6 space-y-3">
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Lieux de travail</dt>
@@ -70,7 +70,7 @@ function activate() {
           </div>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Accueil</dt>
@@ -86,7 +86,7 @@ function activate() {
           </div>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Pause</dt>
@@ -98,7 +98,7 @@ function activate() {
           </div>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">
@@ -117,7 +117,7 @@ function activate() {
           </div>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex items-start justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">

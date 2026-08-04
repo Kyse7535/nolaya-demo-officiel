@@ -3,9 +3,11 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useOfferStore } from '../../stores/offer'
 import { useFrameworkStore } from '../../stores/framework'
 import { lengthLabel } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useOfferStore()
@@ -19,6 +21,8 @@ const {
   barèmeReady,
 } = storeToRefs(store)
 const { pauseText } = storeToRefs(frameworkStore)
+
+const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
 
 function setOfferNum(id, key, event) {
   store.updateLengthOffer(id, { [key]: Number(event.target.value) || 0 })
@@ -34,8 +38,13 @@ function setOfferNum(id, key, event) {
     />
 
     <div class="flex-1 px-5 py-5">
-      <p class="text-xs text-secondary">Étape 4 / 4 · Prix</p>
-      <h2 class="screen-title mt-1">Prix par longueur</h2>
+      <FlowStepper :steps="steps" :current="4" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s14Hero" alt="" class="hero-media h-32 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Prix par longueur</h2>
       <p class="screen-lead">
         Fixez le prix de la longueur de référence, puis adaptez le tarif des autres longueurs.
       </p>

@@ -3,12 +3,16 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useFrameworkStore } from '../../stores/framework'
 import { CANCELLATION_OPTIONS } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useFrameworkStore()
 const { framework } = storeToRefs(store)
+
+const steps = ['Contextes', 'Accueil', 'Pause', 'Communication', 'Politiques']
 </script>
 
 <template>
@@ -20,7 +24,13 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Retard, annulation et photos</h2>
+      <FlowStepper :steps="steps" :current="5" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s08Hero" alt="" class="hero-media h-36 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Retard, annulation et photos</h2>
       <p class="screen-lead">Choisissez des règles simples.</p>
 
       <p class="field-label mt-6">Retard toléré</p>
@@ -29,7 +39,7 @@ const { framework } = storeToRefs(store)
           v-for="m in [10, 15, 20]"
           :key="m"
           type="button"
-          class="choice text-center"
+          class="choice text-center font-mono"
           :class="{ 'choice-active': framework.lateTolerance === m }"
           @click="store.patch({ lateTolerance: m })"
         >

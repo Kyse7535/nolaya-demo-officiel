@@ -3,12 +3,16 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useFrameworkStore } from '../../stores/framework'
 import { CONTEXT_OPTIONS } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useFrameworkStore()
 const { framework } = storeToRefs(store)
+
+const steps = ['Contextes', 'Accueil', 'Pause', 'Communication', 'Politiques']
 </script>
 
 <template>
@@ -20,7 +24,13 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Où vous travaillez</h2>
+      <FlowStepper :steps="steps" :current="1" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s04Hero" alt="" class="hero-media h-36 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Où vous travaillez</h2>
       <p class="screen-lead">
         Ces lieux s’appliquent par défaut à vos prochaines prestations.
       </p>
@@ -35,7 +45,14 @@ const { framework } = storeToRefs(store)
           :class="{ 'choice-active': framework.contexts.includes(opt.id) }"
           @click="store.toggleContext(opt.id)"
         >
-          {{ opt.label }}
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[20px]">
+              {{
+                framework.contexts.includes(opt.id) ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </span>
+            {{ opt.label }}
+          </span>
         </button>
       </div>
 

@@ -12,6 +12,26 @@
   body {
     @apply bg-surface-high font-sans text-primary antialiased;
   }
+
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .material-symbols-outlined.icon-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
 }
 
 @layer components {
@@ -36,7 +56,16 @@
   }
 
   .choice-active {
-    @apply border-secondary bg-secondary-container/40;
+    @apply border-primary bg-primary/[0.04];
+  }
+
+  .hero-media {
+    @apply w-full object-cover;
+    border-radius: 0;
+  }
+
+  .editorial-card {
+    @apply rounded-card border border-outline-soft bg-surface;
   }
 
   .choice-locked {

@@ -417,10 +417,34 @@ export function referenceLengthId(lengthOffers = []) {
 }
 
 export const GALLERY_MOCK = [
-  { id: 'g1', label: 'Réalisation 1', tone: 'from-[#2c2418] to-[#775a19]', proof: 'Photo de réalisation' },
-  { id: 'g2', label: 'Réalisation 2', tone: 'from-[#1b1c1c] to-[#464747]', proof: 'Photo de réalisation' },
-  { id: 'g3', label: 'Réalisation 3', tone: 'from-[#271900] to-[#a17f3c]', proof: 'Inspiration' },
-  { id: 'g4', label: 'Réalisation 4', tone: 'from-[#3d2e14] to-[#e8c176]', proof: 'Photo de réalisation' },
+  {
+    id: 'g1',
+    label: 'Réalisation 1',
+    tone: 'from-[#2c2418] to-[#775a19]',
+    proof: 'Photo de réalisation',
+    src: '/stitch/s12-a.jpg',
+  },
+  {
+    id: 'g2',
+    label: 'Réalisation 2',
+    tone: 'from-[#1b1c1c] to-[#464747]',
+    proof: 'Photo de réalisation',
+    src: '/stitch/s12-b.jpg',
+  },
+  {
+    id: 'g3',
+    label: 'Réalisation 3',
+    tone: 'from-[#271900] to-[#a17f3c]',
+    proof: 'Inspiration',
+    src: '/stitch/s12-c.jpg',
+  },
+  {
+    id: 'g4',
+    label: 'Réalisation 4',
+    tone: 'from-[#3d2e14] to-[#e8c176]',
+    proof: 'Photo de réalisation',
+    src: '/stitch/s11-hero.jpg',
+  },
 ]
 
 export const TASK_DEFAULTS = [

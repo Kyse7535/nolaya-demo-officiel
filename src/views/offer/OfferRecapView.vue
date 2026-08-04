@@ -7,6 +7,7 @@ import StickyFooter from '../../components/StickyFooter.vue'
 import { useOfferStore } from '../../stores/offer'
 import { useFrameworkStore } from '../../stores/framework'
 import { GALLERY_MOCK, OfferStatus } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useOfferStore()
@@ -35,7 +36,7 @@ function activate() {
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Récapitulatif de l’offre</h2>
+      <h2 class="screen-title">Récapitulatif et activation de l’offre</h2>
       <p class="screen-lead">
         {{
           isActive
@@ -44,15 +45,22 @@ function activate() {
         }}
       </p>
 
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s15Hero" alt="" class="hero-media h-32 w-full" />
+      </div>
+
       <p class="field-label mt-6">Aperçu côté cliente</p>
-      <article class="overflow-hidden rounded-card border border-outline-soft bg-surface shadow-sm">
+      <article class="editorial-card overflow-hidden">
         <div class="grid grid-cols-3 gap-0.5 bg-surface-low">
-          <div
-            v-for="item in galleryItems.slice(0, 3)"
-            :key="item.id"
-            class="h-20 bg-gradient-to-br"
-            :class="item.tone"
-          />
+          <div v-for="item in galleryItems.slice(0, 3)" :key="item.id" class="relative h-20">
+            <img
+              v-if="item.src"
+              :src="item.src"
+              alt=""
+              class="hero-media absolute inset-0 h-full w-full"
+            />
+            <div v-else class="h-full bg-gradient-to-br" :class="item.tone" />
+          </div>
           <div
             v-if="galleryItems.length === 0"
             class="col-span-3 flex h-20 items-center justify-center text-xs text-muted"

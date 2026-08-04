@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import StickyFooter from '../../components/StickyFooter.vue'
 import { useOfferStore } from '../../stores/offer'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const offerStore = useOfferStore()
@@ -31,8 +32,12 @@ function openOffer() {
       — vous ne le redéfinirez pas à chaque fois.
     </p>
 
-    <div class="mt-5 rounded-card border border-secondary/30 bg-secondary-container/30 px-3 py-3">
-      <p class="text-xs font-semibold uppercase tracking-wide text-on-secondary-container">
+    <div class="mt-5 overflow-hidden border border-outline-soft">
+      <img :src="STITCH.s10Hero" alt="" class="hero-media h-40 w-full" />
+    </div>
+
+    <div class="mt-4 rounded-card border border-secondary/30 bg-secondary-container/30 px-3 py-3">
+      <p class="font-mono text-[10px] font-semibold uppercase tracking-wider text-on-secondary-container">
         Cadre professionnel actif
       </p>
     </div>
@@ -45,12 +50,19 @@ function openOffer() {
 
     <ul class="mt-4 space-y-2">
       <li
-        v-for="p in pillars"
+        v-for="(p, i) in pillars"
         :key="p.title"
-        class="rounded-card border border-outline-soft bg-surface px-3 py-2.5"
+        class="editorial-card flex items-start gap-3 px-3 py-2.5"
       >
-        <p class="text-sm font-semibold text-primary">{{ p.title }}</p>
-        <p class="text-xs text-muted">{{ p.body }}</p>
+        <span
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-high font-mono text-[10px] font-bold"
+        >
+          {{ i + 1 }}
+        </span>
+        <div>
+          <p class="text-sm font-semibold text-primary">{{ p.title }}</p>
+          <p class="text-xs text-muted">{{ p.body }}</p>
+        </div>
       </li>
     </ul>
 

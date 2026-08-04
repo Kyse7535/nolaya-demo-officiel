@@ -1,0 +1,23 @@
+/** Local Stitch assets (ported from stitch_atelier_synergy_stylist_demo_flow). */
+export const STITCH = {
+  s01Hero: '/stitch/s01-hero.jpg',
+  s01Avatar: '/stitch/s01-avatar.jpg',
+  s02Avatar: '/stitch/s02-avatar.jpg',
+  s03Hero: '/stitch/s03-hero.jpg',
+  s04Hero: '/stitch/s04-hero.jpg',
+  s05Hero: '/stitch/s05-hero.jpg',
+  s06Hero: '/stitch/s06-hero.jpg',
+  s07Hero: '/stitch/s07-hero.jpg',
+  s08Hero: '/stitch/s08-hero.jpg',
+  s10Hero: '/stitch/s10-hero.jpg',
+  s11Hero: '/stitch/s11-hero.jpg',
+  s12a: '/stitch/s12-a.jpg',
+  s12b: '/stitch/s12-b.jpg',
+  s12c: '/stitch/s12-c.jpg',
+  s13Hero: '/stitch/s13-hero.jpg',
+  s14Hero: '/stitch/s14-hero.jpg',
+  s15Hero: '/stitch/s15-hero.jpg',
+  s16Hero: '/stitch/s16-hero.jpg',
+  s19Hero: '/stitch/s19-hero.jpg',
+  s19Avatar: '/stitch/s19-avatar.jpg',
+}

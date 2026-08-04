@@ -3,12 +3,16 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import ScreenHeader from '../../components/ScreenHeader.vue'
 import StickyFooter from '../../components/StickyFooter.vue'
+import FlowStepper from '../../components/FlowStepper.vue'
 import { useFrameworkStore } from '../../stores/framework'
 import { CHANNEL_OPTIONS, PAYMENT_OPTIONS } from '../../domain/model'
+import { STITCH } from '../../assets/stitchAssets'
 
 const router = useRouter()
 const store = useFrameworkStore()
 const { framework } = storeToRefs(store)
+
+const steps = ['Contextes', 'Accueil', 'Pause', 'Communication', 'Politiques']
 </script>
 
 <template>
@@ -20,7 +24,13 @@ const { framework } = storeToRefs(store)
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Communication et paiement</h2>
+      <FlowStepper :steps="steps" :current="4" />
+
+      <div class="mt-5 overflow-hidden border border-outline-soft">
+        <img :src="STITCH.s07Hero" alt="" class="hero-media h-36 w-full" />
+      </div>
+
+      <h2 class="screen-title mt-5">Communication et paiement</h2>
       <p class="screen-lead">Comment on vous joint, et comment vous êtes payée.</p>
 
       <p class="field-label mt-6">Où vous écrire</p>

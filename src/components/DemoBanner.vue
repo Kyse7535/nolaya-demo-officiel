@@ -13,18 +13,26 @@ function onReset() {
 </script>
 
 <template>
-  <div class="sticky top-0 z-40 border-b border-secondary/20 bg-[#fff8e8] px-3 py-2">
+  <div class="sticky top-0 z-40 border-b border-secondary/20 bg-secondary-container/80 px-3 py-2">
     <div class="flex items-center justify-between gap-2">
-      <p class="text-[11px] font-medium leading-snug text-on-secondary-container">
-        Mode démo — {{ demo.sceneLabel }}
-      </p>
+      <div class="min-w-0">
+        <p
+          class="truncate font-mono text-[10px] font-medium uppercase tracking-wider text-on-secondary-container"
+        >
+          Mode démo — {{ demo.sceneLabel }}
+        </p>
+      </div>
       <div class="flex shrink-0 items-center gap-2">
-        <button type="button" class="text-[11px] font-semibold text-secondary" @click="onReset">
-          Réinitialiser
+        <button
+          type="button"
+          class="font-mono text-[10px] font-semibold uppercase tracking-wider text-secondary"
+          @click="onReset"
+        >
+          Réinit.
         </button>
         <button
           type="button"
-          class="text-[11px] font-semibold text-muted"
+          class="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted"
           @click="router.push({ name: 'demo-start' })"
         >
           Quitter

@@ -40,24 +40,24 @@ function activate() {
     />
 
     <div class="flex-1 px-5 py-5">
-      <h2 class="screen-title">Récapitulatif du planning</h2>
+      <h2 class="screen-title">Récapitulatif et activation du planning</h2>
       <p class="screen-lead">Confirmez avant d’activer votre disponibilité.</p>
 
       <dl class="mt-6 space-y-3">
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Cadre actif</dt>
           <dd class="mt-1 text-sm text-primary">
             {{ pauseText }} · retard {{ framework.lateTolerance }} min
           </dd>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Offre active</dt>
           <dd class="mt-1 text-sm text-primary">{{ label }}</dd>
           <dd class="mt-1 text-sm text-muted">Longueurs : {{ lengthsSummary }}</dd>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Lieu</dt>
@@ -69,7 +69,7 @@ function activate() {
           </div>
         </div>
 
-        <div class="rounded-card border border-outline-soft bg-surface px-3 py-3">
+        <div class="editorial-card px-3 py-3">
           <div class="flex justify-between gap-2">
             <div>
               <dt class="text-xs font-semibold uppercase tracking-wide text-secondary">Planning</dt>
