@@ -8,9 +8,10 @@ import { STITCH } from '../assets/stitchAssets'
 
 const router = useRouter()
 const demo = useDemoStore()
-const { stylistName, stylistContacts } = storeToRefs(demo)
+const { stylistName, stylistContacts, stylistWorkplace } = storeToRefs(demo)
 
 const nameDraft = ref(stylistName.value || '')
+const workplaceDraft = ref(stylistWorkplace.value || '')
 const contactsDraft = ref({
   ...createEmptyContacts(),
   ...(stylistContacts.value || {}),
@@ -18,7 +19,14 @@ const contactsDraft = ref({
 
 const canStart = computed(() => {
   const nameOk = String(nameDraft.value || '').trim().length > 0
-  return nameOk && hasAnyContact(contactsDraft.value)
+  const placeOk = String(workplaceDraft.value || '').trim().length > 0
+  return nameOk && placeOk && hasAnyContact(contactsDraft.value)
+})
+
+const identityPreview = computed(() => {
+  const name = String(nameDraft.value || '').trim() || 'Vous'
+  const place = String(workplaceDraft.value || '').trim()
+  return place ? `${name} — ${place}` : name
 })
 
 const steps = [
@@ -28,7 +36,7 @@ const steps = [
 ]
 
 function onStart() {
-  if (!demo.startAs(nameDraft.value, contactsDraft.value)) return
+  if (!demo.startAs(nameDraft.value, contactsDraft.value, workplaceDraft.value)) return
   router.push({ name: 'dashboard' })
 }
 </script>
@@ -80,7 +88,7 @@ function onStart() {
           />
           <div>
             <p class="text-sm font-semibold text-primary">
-              {{ canStart ? nameDraft.trim() : 'Vous' }} — coiffeuse en tresses, Saint-Denis
+              {{ identityPreview }}
             </p>
             <p class="mt-2 text-xs font-semibold uppercase tracking-wide text-secondary">Parcours</p>
             <ol class="mt-1 space-y-0.5 text-sm text-muted">
@@ -129,6 +137,22 @@ function onStart() {
             placeholder="Ex. Amina"
             @keydown.enter.prevent="onStart"
           />
+        </div>
+
+        <div>
+          <label class="field-label" for="stylist-workplace">Lieu de travail</label>
+          <input
+            id="stylist-workplace"
+            v-model="workplaceDraft"
+            type="text"
+            autocomplete="address-level2"
+            class="w-full rounded-card border border-outline-soft bg-surface px-3 py-3 text-sm text-primary"
+            placeholder="Ex. Paris 18e, À domicile — Aubervilliers…"
+            @keydown.enter.prevent="onStart"
+          />
+          <p class="mt-1.5 text-xs text-muted">
+            Ville, quartier ou formule (salon, domicile…) — comme vous l’indiquez à vos clientes.
+          </p>
         </div>
 
         <div>
@@ -208,7 +232,7 @@ function onStart() {
           Commencer
         </button>
         <p class="text-center text-[11px] text-muted">
-          Prénom + au moins un contact requis pour démarrer.
+          Prénom, lieu de travail et au moins un contact requis pour démarrer.
         </p>
       </div>
     </div>

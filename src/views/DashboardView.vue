@@ -16,7 +16,7 @@ const frameworkStore = useFrameworkStore()
 const offerStore = useOfferStore()
 const scheduleStore = useScheduleStore()
 const opportunity = useOpportunityStore()
-const { displayName } = storeToRefs(demo)
+const { displayName, displayWorkplace, stylistWorkplace } = storeToRefs(demo)
 const { status: frameworkStatus, isActive: frameworkActive } = storeToRefs(frameworkStore)
 const { status: offerStatus, isActive: offerActive, label } = storeToRefs(offerStore)
 const { isActive: scheduleActive } = storeToRefs(scheduleStore)
@@ -68,6 +68,7 @@ function goPrimary() {
       <div>
         <p class="text-sm text-muted">Bonjour</p>
         <h1 class="text-2xl font-bold tracking-tight text-primary">{{ displayName }}</h1>
+        <p v-if="stylistWorkplace" class="mt-0.5 text-sm text-muted">{{ displayWorkplace }}</p>
       </div>
     </div>
 

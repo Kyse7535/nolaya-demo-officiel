@@ -26,7 +26,7 @@ const FEEDBACK_BY_ACT_KEY = 'demo-precurseur.feedbackByAct'
  * Shape : {
  *   users: {
  *     [name]: {
- *       name, contacts, sessionId, startedAt, feedbackByAct,
+ *       name, workplace, contacts, sessionId, startedAt, feedbackByAct,
  *       netlifySubmittedAt, lastNetlifyError
  *     }
  *   },
@@ -97,10 +97,15 @@ function loadLegacyFlatFeedback() {
   return null
 }
 
+function normalizeWorkplace(value) {
+  return String(value || '').trim()
+}
+
 function normalizeUserEntry(key, entry) {
   if (!entry || typeof entry !== 'object') {
     return {
       name: key,
+      workplace: '',
       contacts: createEmptyContacts(),
       sessionId: newSessionId(),
       startedAt: new Date().toISOString(),
@@ -111,6 +116,7 @@ function normalizeUserEntry(key, entry) {
   }
   return {
     name: entry.name || key,
+    workplace: normalizeWorkplace(entry.workplace),
     contacts: normalizeContacts(entry.contacts),
     sessionId: entry.sessionId || newSessionId(),
     startedAt: entry.startedAt || null,
@@ -172,6 +178,11 @@ export const useDemoStore = defineStore('demo', () => {
       ? normalizeContacts(archive.value.users[stylistName.value].contacts)
       : createEmptyContacts(),
   )
+  const stylistWorkplace = ref(
+    stylistName.value && archive.value.users[stylistName.value]
+      ? normalizeWorkplace(archive.value.users[stylistName.value].workplace)
+      : '',
+  )
   const researchOpen = ref(false)
   const researchActId = ref('E')
   const netlifySubmitting = ref(false)
@@ -188,6 +199,14 @@ export const useDemoStore = defineStore('demo', () => {
 
   /** Nom affiché partout dans l’UI ; fallback Sarah uniquement si vide. */
   const displayName = computed(() => userKey(stylistName.value) || DEFAULT_STYLIST_NAME)
+
+  /** Lieu saisi par la testeuse ; fallback neutre si vide. */
+  const displayWorkplace = computed(
+    () => normalizeWorkplace(stylistWorkplace.value) || 'lieu non renseigné',
+  )
+
+  /** Ligne d’identité : prénom + lieu saisi (pas de persona marketing figée). */
+  const identityLine = computed(() => `${displayName.value} — ${displayWorkplace.value}`)
 
   const hasStylistName = computed(() => userKey(stylistName.value).length > 0)
 
@@ -316,6 +335,7 @@ export const useDemoStore = defineStore('demo', () => {
     const entry = ensureUserEntry(next, key)
     entry.feedbackByAct = normalizeFeedbackByAct(feedbackByAct.value)
     entry.contacts = normalizeContacts(stylistContacts.value)
+    entry.workplace = normalizeWorkplace(stylistWorkplace.value)
     Object.assign(entry, extra)
     archive.value = next
     persistArchive(next)
@@ -419,6 +439,7 @@ export const useDemoStore = defineStore('demo', () => {
       demoVersion: DEMO_VERSION,
       identity: {
         name: key || displayName.value,
+        workplace: normalizeWorkplace(stylistWorkplace.value || entry?.workplace),
         contacts,
       },
       answersByAct,
@@ -494,12 +515,15 @@ export const useDemoStore = defineStore('demo', () => {
   }
 
   /**
-   * Enregistre le prénom + contacts au démarrage et charge le bucket de retours associé.
+   * Enregistre prénom + lieu de travail + contacts au démarrage
+   * et charge le bucket de retours associé.
    * Si un plat legacy existe encore et que l’utilisatrice n’a pas de bucket, on le migre.
    */
-  function startAs(name, contacts = {}) {
+  function startAs(name, contacts = {}, workplace = '') {
     const key = userKey(name)
     if (!key) return false
+    const place = normalizeWorkplace(workplace)
+    if (!place) return false
     const normalized = normalizeContacts(contacts)
     if (!hasAnyContact(normalized)) return false
 
@@ -510,6 +534,7 @@ export const useDemoStore = defineStore('demo', () => {
     }
     const entry = ensureUserEntry(next, key)
     entry.contacts = normalized
+    entry.workplace = place
     // Nouvelle session de parcours : nouvel id si pas encore d’envoi Netlify
     if (!entry.netlifySubmittedAt) {
       entry.sessionId = newSessionId()
@@ -528,8 +553,11 @@ export const useDemoStore = defineStore('demo', () => {
     persistArchive(next)
     stylistName.value = key
     stylistContacts.value = normalized
+    stylistWorkplace.value = place
     feedbackByAct.value = normalizeFeedbackByAct(entry.feedbackByAct)
     promptedDismissed.value = {}
+    // Préremplit le lieu planning (modifiable ensuite dans la config planning).
+    useScheduleStore().seedPlace(place)
     return true
   }
 
@@ -545,6 +573,7 @@ export const useDemoStore = defineStore('demo', () => {
     feedbackByAct.value = createEmptyFeedbackByAct()
     promptedDismissed.value = {}
     stylistName.value = ''
+    stylistWorkplace.value = ''
     stylistContacts.value = createEmptyContacts()
   }
 
@@ -580,6 +609,7 @@ export const useDemoStore = defineStore('demo', () => {
     if (key && archive.value.users[key]) {
       feedbackByAct.value = normalizeFeedbackByAct(archive.value.users[key].feedbackByAct)
       stylistContacts.value = normalizeContacts(archive.value.users[key].contacts)
+      stylistWorkplace.value = normalizeWorkplace(archive.value.users[key].workplace)
     } else {
       feedbackByAct.value = createEmptyFeedbackByAct()
     }
@@ -597,6 +627,7 @@ export const useDemoStore = defineStore('demo', () => {
     return {
       stylistName: stylistName.value || null,
       displayName: displayName.value,
+      workplace: normalizeWorkplace(stylistWorkplace.value) || null,
       contacts: normalizeContacts(stylistContacts.value),
       framework: framework.status,
       offer: offer.status === OfferStatus.NONE ? 'NONE' : offer.status,
@@ -626,8 +657,11 @@ export const useDemoStore = defineStore('demo', () => {
     feedbackByAct,
     feedback,
     stylistName,
+    stylistWorkplace,
     stylistContacts,
     displayName,
+    displayWorkplace,
+    identityLine,
     hasStylistName,
     sceneMeta,
     scene,

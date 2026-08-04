@@ -121,6 +121,19 @@ export const useScheduleStore = defineStore('schedule', () => {
     localStorage.removeItem(STORAGE_KEY)
   }
 
+  /**
+   * Préremplit le lieu planning depuis l’identité (sans passer en DRAFT).
+   * Remplace uniquement un lieu vide ou l’ancien défaut figé « Saint-Denis ».
+   */
+  function seedPlace(place) {
+    const next = String(place || '').trim()
+    if (!next) return
+    const current = String(schedule.value.place || '').trim()
+    if (current && current !== 'Saint-Denis') return
+    schedule.value = { ...schedule.value, place: next }
+    persist()
+  }
+
   return {
     schedule,
     status,
@@ -131,6 +144,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     canActivate,
     startDraft,
     patch,
+    seedPlace,
     toggleWeekday,
     updateDayHours,
     activate,

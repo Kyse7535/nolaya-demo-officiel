@@ -16,6 +16,7 @@ export async function submitTesterResponse(sessionPayload) {
   body.set('form-name', TESTER_FORM_NAME)
   body.set('bot-field', '')
   body.set('prenom', String(identity.name || '').trim())
+  body.set('lieu-travail', String(identity.workplace || '').trim())
   body.set('instagram', String(contacts.instagram || '').trim())
   body.set('tiktok', String(contacts.tiktok || '').trim())
   body.set('telephone', String(contacts.phone || '').trim())

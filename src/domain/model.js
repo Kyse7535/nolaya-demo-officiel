@@ -135,7 +135,7 @@ export const INES_RAIL = {
   dateLabel: 'Samedi 15 août',
   timeLabel: '9 h',
   arrivalLabel: '8 h 57',
-  place: 'Saint-Denis',
+  place: 'lieu non renseigné',
   budgetTarget: 170,
   budgetMax: 180,
   priceBase: 150,
@@ -288,7 +288,7 @@ export const REFUSAL_REASONS = [
 export const MATCH_CRITERIA = [
   'Offre correspondante (knotless moyen · mi-dos)',
   'Créneau libre (15 août · 9 h)',
-  'Zone qui correspond (Saint-Denis)',
+  'Zone qui correspond (lieu non renseigné)',
   'Budget max. 180 €',
   'Cuir chevelu sensible accepté',
 ]
@@ -690,7 +690,7 @@ export function createEmptySchedule() {
   const weekdays = ['mar', 'mer', 'jeu', 'ven', 'sam']
   return {
     status: ScheduleStatus.NONE,
-    place: 'Saint-Denis',
+    place: '',
     weekdays,
     dayHours: Object.fromEntries(weekdays.map((id) => [id, { ...DEFAULT_DAY_HOURS }])),
     maxPerDay: 1,

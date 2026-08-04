@@ -191,7 +191,7 @@ function confirmRefuse() {
 
         <div
           v-if="hasNewAdditions"
-          class="sticky top-12 z-20 mt-4 rounded-card border border-secondary/40 bg-secondary-container/30 px-3 py-3 shadow-sm"
+          class="sticky top-12 z-20 mt-4 rounded-card border border-secondary bg-secondary-container px-3 py-3 shadow-sm"
         >
           <div class="flex items-start justify-between gap-3">
             <div>

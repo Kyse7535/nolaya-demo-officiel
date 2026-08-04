@@ -120,7 +120,7 @@ watch(
 
     <div class="flex-1 px-5 py-5 pb-28">
       <p class="badge-mono">Avis vérifié · {{ rail.clientName }}</p>
-      <h2 class="mt-2 screen-title">Ce qu’Inès a retenu</h2>
+      <h2 class="mt-2 screen-title">Ce que Inès pense de vous</h2>
       <p class="screen-lead">
         Lisez l’avis, répondez, puis voyez la suite avec Inès.
       </p>

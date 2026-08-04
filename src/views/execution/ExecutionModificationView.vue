@@ -114,7 +114,7 @@ function resume() {
         <p
           class="mt-3 rounded-card border border-secondary/30 bg-secondary-container/20 px-3 py-2.5 text-sm font-semibold leading-relaxed text-on-secondary-container"
         >
-          On note ici le changement pour éviter le « tu m’avais dit… » sur le prix ou la durée à
+          On note ici le changement pour éviter les malentendus, sur le prix ou la durée à
           la fin.
         </p>
 
