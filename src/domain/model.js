@@ -337,7 +337,6 @@ export const PAYMENT_OPTIONS = [
 ]
 
 export const CANCELLATION_OPTIONS = [
-  { id: 'selon-delai', label: 'Annulation selon le délai restant' },
   { id: '24h', label: 'Annulation gratuite jusqu’à 24 h avant' },
   { id: '48h', label: 'Annulation gratuite jusqu’à 48 h avant' },
 ]
@@ -666,7 +665,7 @@ export function createEmptyFramework() {
     payments: ['carte', 'plateforme'],
     balanceWhen: 'fin',
     lateTolerance: 15,
-    cancellationPolicy: 'selon-delai',
+    cancellationPolicy: '24h',
     safetyInterrupt: true,
     photoConsent: 'explicit',
   }
@@ -846,6 +845,11 @@ export function migrateFramework(raw) {
   delete merged.channel
 
   merged.safetyInterrupt = true
+
+  // Removed vague catalog option « Annulation selon le délai restant »
+  if (merged.cancellationPolicy === 'selon-delai') {
+    merged.cancellationPolicy = '24h'
+  }
 
   return merged
 }

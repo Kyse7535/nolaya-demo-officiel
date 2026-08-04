@@ -47,7 +47,7 @@ const steps = ['Contextes', 'Accueil', 'Pause', 'Communication', 'Politiques']
         </button>
       </div>
 
-      <p class="field-label mt-6">Annulation / report</p>
+      <p class="field-label mt-6">Définir ses règles d’annulation</p>
       <button
         v-for="opt in CANCELLATION_OPTIONS"
         :key="opt.id"
