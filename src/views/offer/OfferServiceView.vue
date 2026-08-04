@@ -11,7 +11,7 @@ const router = useRouter()
 const store = useOfferStore()
 const { offer } = storeToRefs(store)
 
-const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
+const steps = ['Prestation', 'Galerie de la prestation', 'Préparation', 'Prix']
 </script>
 
 <template>

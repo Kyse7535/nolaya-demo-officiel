@@ -22,7 +22,7 @@ const {
 } = storeToRefs(store)
 const { pauseText } = storeToRefs(frameworkStore)
 
-const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
+const steps = ['Prestation', 'Galerie de la prestation', 'Préparation', 'Prix']
 
 function setOfferNum(id, key, event) {
   store.updateLengthOffer(id, { [key]: Number(event.target.value) || 0 })

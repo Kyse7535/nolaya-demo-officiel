@@ -11,13 +11,13 @@ const router = useRouter()
 const store = useOfferStore()
 const { offer, label, lengthsSummary } = storeToRefs(store)
 
-const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
+const steps = ['Prestation', 'Galerie de la prestation', 'Préparation', 'Prix']
 </script>
 
 <template>
   <div class="flex flex-1 flex-col">
     <ScreenHeader
-      title="Prestation"
+      title="Galerie de la prestation"
       badge="Brouillon"
       @back="router.push({ name: 'offer-prestation' })"
     />

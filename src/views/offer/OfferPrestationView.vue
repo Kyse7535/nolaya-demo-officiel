@@ -12,7 +12,7 @@ const router = useRouter()
 const store = useOfferStore()
 const { offer, hasEnabledLength, hasEnabledSize } = storeToRefs(store)
 
-const steps = ['Prestation', 'Galerie', 'Préparation', 'Prix']
+const steps = ['Prestation', 'Galerie de la prestation', 'Préparation', 'Prix']
 
 function isLengthEnabled(id) {
   return offer.value.lengthOffers.some((o) => o.id === id && o.enabled)
