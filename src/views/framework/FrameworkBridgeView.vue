@@ -28,8 +28,7 @@ function openOffer() {
     <p class="badge-mono">Cadre actif</p>
     <h1 class="mt-3 screen-title">Votre cadre professionnel est actif</h1>
     <p class="screen-lead">
-      Vous pouvez maintenant créer ce que vous proposez aux clientes. Le cadre s’applique par défaut
-      — vous ne le redéfinirez pas à chaque fois.
+      Vous pouvez maintenant créer ce que vous proposez aux clientes
     </p>
 
     <div class="mt-5 overflow-hidden border border-outline-soft">
@@ -44,7 +43,7 @@ function openOffer() {
 
     <h2 class="mt-6 text-lg font-bold text-primary">Créer ce que vous proposez</h2>
     <p class="mt-2 text-sm leading-relaxed text-muted">
-      Choisissez une prestation, montrez comment elle se présente, dites qui prépare quoi, puis
+      Choisissez une prestation, montrez comment elle se présente, puis
       fixez prix et durée. Le planning viendra ensuite.
     </p>
 
