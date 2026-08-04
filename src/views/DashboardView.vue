@@ -169,18 +169,25 @@ function goPrimary() {
 
     <div
       v-if="helpOpen"
-      class="fixed inset-0 z-50 flex items-end bg-primary/40"
-      @click.self="helpOpen = false"
+      class="fixed inset-0 z-50 flex justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cadre-help-title"
     >
-      <div class="w-full rounded-t-xl bg-surface p-5">
-        <div class="mx-auto mb-4 h-1 w-12 rounded-full bg-surface-high" />
-        <h2 class="text-base font-bold text-primary">Cadre professionnel</h2>
-        <p class="mt-2 text-sm leading-relaxed text-muted">
-          Le cadre décrit comment vous travaillez : contextes, accueil, pause, communication,
-          paiement, politiques. Ce n’est pas encore votre prestation. Vous le définissez une fois,
-          puis vous l’utilisez pour ce que vous proposez.
-        </p>
-        <button type="button" class="btn-primary mt-5" @click="helpOpen = false">Compris</button>
+      <div
+        class="flex h-full w-full max-w-phone flex-col justify-end bg-primary/40"
+        @click.self="helpOpen = false"
+      >
+        <div class="w-full rounded-t-xl bg-surface p-5">
+          <div class="mx-auto mb-4 h-1 w-12 rounded-full bg-surface-high" />
+          <h2 id="cadre-help-title" class="text-base font-bold text-primary">Cadre professionnel</h2>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            Le cadre décrit comment vous travaillez : contextes, accueil, pause, communication,
+            paiement, politiques. Ce n’est pas encore votre prestation. Vous le définissez une fois,
+            puis vous l’utilisez pour ce que vous proposez.
+          </p>
+          <button type="button" class="btn-primary mt-5" @click="helpOpen = false">Compris</button>
+        </div>
       </div>
     </div>
   </div>
