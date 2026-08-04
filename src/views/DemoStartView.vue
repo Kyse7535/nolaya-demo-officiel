@@ -64,7 +64,7 @@ function onStart() {
         </div>
       </div>
       <div class="absolute inset-x-0 bottom-0 px-5 pb-4">
-        <p class="text-2xl font-bold tracking-tight text-white drop-shadow">Atelier Synergy</p>
+        <p class="text-2xl font-bold tracking-tight text-white drop-shadow">Nolaya</p>
       </div>
     </section>
 
